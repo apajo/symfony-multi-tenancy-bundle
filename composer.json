@@ -20,7 +20,7 @@
         "doctrine/doctrine-bundle": "^2.12",
         "doctrine/doctrine-migrations-bundle": "^3.3",
         "symfony/config": "^6.3|^7.0",
-        "symfony/dependency-injection": "^7.1",
+        "symfony/dependency-injection": "^6.3|^7.1",
         "symfony/orm-pack": "^2.4"
     },
     "require-dev": {
