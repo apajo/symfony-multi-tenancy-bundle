@@ -1,0 +1,24 @@
+imports:
+  - { resource: "adapters.yml" }
+
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+  
+  # Commands
+  aPajo\MultiTenancyBundle\Command\:
+    resource: '../../Command/*'
+
+  # Services
+  aPajo\MultiTenancyBundle\Service\:
+    resource: '../../Service/*'
+  #    exclude: '../../Service/*'
+  
+  aPajo\MultiTenancyBundle\Service\Resolver\HostBasedResolver:
+    arguments:
+      $requestStack: '@request_stack'
+      $tokenstorage: '@security.untracked_token_storage'
+
+  aPajo\MultiTenancyBundle\Event\Listener\RequestListener:
+

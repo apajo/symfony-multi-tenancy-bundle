@@ -1,0 +1,57 @@
+{
+    "name": "apajo/symfony-multi-tenancy-bundle",
+    "type": "symfony-bundle",
+    "description": "Multi tenancy bundle for Symfony",
+    "keywords": [
+        "symfony",
+        "tenants",
+        "multi-tenancy"
+    ],
+    "homepage": "https://www.apajo.ee",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Andres Pajo",
+            "homepage": "https://www.apajo.ee"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "doctrine/doctrine-bundle": "^2.12",
+        "doctrine/doctrine-migrations-bundle": "^3.3",
+        "symfony/config": "^6.3|^7.0",
+        "symfony/dependency-injection": "^7.1",
+        "symfony/orm-pack": "^2.4"
+    },
+    "require-dev": {
+        "symfony/phpunit-bridge": "^5.4 | ^v6.4.0|^7.0",
+        "phpunit/phpunit": "^9.5"
+    },
+    "scripts": {
+        "cs-fixer": [
+            "php-cs-fixer fix --verbose"
+        ],
+        "psalm": [
+            "psalm"
+        ],
+        "phpunit": [
+            "SYMFONY_DEPRECATIONS_HELPER=max[self]=0 simple-phpunit"
+        ]
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "composer/package-versions-deprecated": true
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "APajo\\MultiTenancyBundle\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "APajo\\MultiTenancyBundle\\Tests\\": "tests/"
+        }
+    }
+}
