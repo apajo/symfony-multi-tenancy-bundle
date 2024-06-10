@@ -2,6 +2,9 @@
 
 ## Description
 
+This bundles aim is to ease and automate multi tenancy in symfony.
+It provides a way to dynamically change the system configuration based on the tenant (database, media, smtp etc).
+
 ## Requirements
 
 - [Symfony 6.3 / 7](https://www.symfony.com/)
