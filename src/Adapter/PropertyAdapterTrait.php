@@ -17,6 +17,10 @@ trait PropertyAdapterTrait
     $accessor = new PropertyAccessor();
     $dsn = $accessor->getValue($tenant, $this->property);
 
+    if (!$dsn) {
+      return;
+    }
+
     return $this->doAdapt(Dsn::fromString($dsn));
   }
 
