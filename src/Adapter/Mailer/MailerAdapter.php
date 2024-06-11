@@ -2,17 +2,15 @@
 
 namespace aPajo\MultiTenancyBundle\Adapter\Mailer;
 
+use aPajo\MultiTenancyBundle\Adapter\Dsn;
 use aPajo\MultiTenancyBundle\Adapter\PropertyAdapterInterface;
 use aPajo\MultiTenancyBundle\Adapter\PropertyAdapterTrait;
-use Exception;
-use Gaufrette\Adapter\Ftp as FtpAdapter;
 use InvalidArgumentException;
 use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mailer\Transport\AbstractTransportFactory;
+use Symfony\Component\Mailer\Transport\Dsn as MailerDsn;
 use Symfony\Component\Mailer\Transport\TransportInterface;
 use Throwable;
-use aPajo\MultiTenancyBundle\Adapter\Dsn;
-use Symfony\Component\Mailer\Transport\Dsn as MailerDsn;
 
 class MailerAdapter extends AbstractTransportFactory implements PropertyAdapterInterface
 {
@@ -40,7 +38,7 @@ class MailerAdapter extends AbstractTransportFactory implements PropertyAdapterI
         throw new InvalidArgumentException('The mailer DSN must contain a scheme.');
       }
 
-      $this->transport = Transport::fromDsn((string) $dsn);
+      $this->transport = Transport::fromDsn((string)$dsn);
 
       return $this->transport;
     } catch (Throwable $exception) {

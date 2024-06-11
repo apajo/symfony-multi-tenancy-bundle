@@ -26,9 +26,9 @@ class MigrateCommand extends Command
 {
 
   public function __construct(
-    private TenantManager $tenantManager,
-    private EnvironmentProvider $environmentProvider,
-    private TenantConfig $tenantConfig,
+    private TenantManager          $tenantManager,
+    private EnvironmentProvider    $environmentProvider,
+    private TenantConfig           $tenantConfig,
     private EntityManagerInterface $em
   )
   {
@@ -53,8 +53,7 @@ class MigrateCommand extends Command
     $output->writeln("Total of {$total} tenants found.");
 
 
-
-    $this->environmentProvider->forAll(function (TenantInterface $tenant, EntityManagerInterface $em ) use ($input, $output,$total) {
+    $this->environmentProvider->forAll(function (TenantInterface $tenant, EntityManagerInterface $em) use ($input, $output, $total) {
       $id = $this->tenantConfig->getTenantIdentifier($tenant);
       $output->writeln("Migrating tenant {$id} ...");
       $output->writeln("==================================================");

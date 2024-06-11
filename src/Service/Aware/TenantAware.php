@@ -24,6 +24,12 @@ class TenantAware
   {
   }
 
+  public function onTenantSelectEvent(TenantSelectEvent $event)
+  {
+    $tenant = $event->getTenant();
+    $this->tenant = $tenant;
+  }
+
   public function getTenant($exception = true): ?TenantInterface
   {
     if (!$this->tenant && $exception) {
@@ -31,12 +37,5 @@ class TenantAware
     }
 
     return $this->tenant;
-  }
-
-
-  public function onTenantSelectEvent(TenantSelectEvent $event)
-  {
-    $tenant = $event->getTenant();
-    $this->tenant = $tenant;
   }
 }

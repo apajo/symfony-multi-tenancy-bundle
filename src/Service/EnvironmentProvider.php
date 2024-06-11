@@ -76,16 +76,16 @@ class EnvironmentProvider
     $this->dispatcher->dispatch($event);
   }
 
+  public function reset()
+  {
+    $event = new TenantSelectEvent(null);
+    $this->dispatcher->dispatch($event);
+  }
+
   public function selectTenantById(?int $tenantId = null)
   {
     $tenant = $this->getRepo()->find($tenantId);
     $event = new TenantSelectEvent($tenant);
-    $this->dispatcher->dispatch($event);
-  }
-
-  public function reset()
-  {
-    $event = new TenantSelectEvent(null);
     $this->dispatcher->dispatch($event);
   }
 

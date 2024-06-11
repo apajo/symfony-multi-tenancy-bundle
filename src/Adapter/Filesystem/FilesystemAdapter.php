@@ -19,7 +19,7 @@ class FilesystemAdapter extends Filesystem implements PropertyAdapterInterface
 
   public function __construct(Adapter $adapter)
   {
-    $this->adapter = $adapter ;
+    $this->adapter = $adapter;
     parent::__construct($this->adapter);
   }
 

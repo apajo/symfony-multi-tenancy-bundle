@@ -9,7 +9,6 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Hakam\MultiTenancyBundle\Command\MigrateCommand as HakamMigrateCommand;
-use LogicException;
 use Psr\Container\ContainerInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -20,7 +19,6 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -28,13 +26,15 @@ use Symfony\Component\Security\Core\User\UserInterface;
 class TenantManager
 {
   public function __construct(
-    private ResolverRegistry $resolverRegistry,
-    private TenantConfig $config,
-    private KernelInterface $kernel,
-    private ManagerRegistry                 $registry,
-    private ContainerInterface              $container,
-    private EventDispatcherInterface        $eventDispatcher,
-  ) {}
+    private ResolverRegistry         $resolverRegistry,
+    private TenantConfig             $config,
+    private KernelInterface          $kernel,
+    private ManagerRegistry          $registry,
+    private ContainerInterface       $container,
+    private EventDispatcherInterface $eventDispatcher,
+  )
+  {
+  }
 
   public function migrate(TenantInterface $tenant): bool
   {

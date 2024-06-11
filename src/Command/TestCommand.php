@@ -31,8 +31,8 @@ class TestCommand extends Command
     protected AdapterRegistry        $registry,
     protected TenantManager          $tenantManager,
     protected EnvironmentProvider    $environmentProvider,
-    protected TenantConfig          $tenantConfig,
-    protected MessageBusInterface $bus,
+    protected TenantConfig           $tenantConfig,
+    protected MessageBusInterface    $bus,
   )
   {
     parent::__construct();

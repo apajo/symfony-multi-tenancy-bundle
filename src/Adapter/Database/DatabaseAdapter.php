@@ -15,12 +15,6 @@ class DatabaseAdapter implements PropertyAdapterInterface
 
   protected string $property = 'database';
 
-  public function __construct(
-    private EventDispatcherInterface $dispatcher,
-    private TenantConfig $tenantConfig,
-    private Registry $doctrine,
-  ) {}
-
   public function doAdapt(Dsn $dsn)
   {
     $connection = $this->doctrine->getConnection('tenant');
@@ -53,5 +47,13 @@ class DatabaseAdapter implements PropertyAdapterInterface
       'port' => $dsn->getPort(),
       'driver' => sprintf('pdo_%s', $dsn->getScheme())
     ];
+  }
+
+  public function __construct(
+    private EventDispatcherInterface $dispatcher,
+    private TenantConfig             $tenantConfig,
+    private Registry                 $doctrine,
+  )
+  {
   }
 }

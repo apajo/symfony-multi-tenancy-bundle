@@ -2,11 +2,11 @@
 
 namespace aPajo\MultiTenancyBundle\Service\Resolver;
 
+use aPajo\MultiTenancyBundle\Entity\TenantInterface;
 use aPajo\MultiTenancyBundle\Service\TenantConfig;
 use LogicException;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
-use aPajo\MultiTenancyBundle\Entity\TenantInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class HostBasedResolver implements TenantResolverInterface
@@ -15,7 +15,9 @@ class HostBasedResolver implements TenantResolverInterface
     private RequestStack $requestStack,
     private TokenStorage $tokenstorage,
     private TenantConfig $config,
-  ) {}
+  )
+  {
+  }
 
   public function resolve(): ?TenantInterface
   {
@@ -38,23 +40,6 @@ class HostBasedResolver implements TenantResolverInterface
     }
 
     return null;
-  }
-
-
-  private function getHost(): ?string
-  {
-    $request = $this->requestStack->getCurrentRequest();
-
-    if (!$request) {
-      return null;
-    }
-
-    return $request->getHost();
-  }
-
-  private function resolveByCrits(array $crits): ?TenantInterface
-  {
-    return $this->config->getRepository()->findOneBy($crits);
   }
 
   /**
@@ -81,6 +66,22 @@ class HostBasedResolver implements TenantResolverInterface
     }
 
     return $user;
+  }
+
+  private function resolveByCrits(array $crits): ?TenantInterface
+  {
+    return $this->config->getRepository()->findOneBy($crits);
+  }
+
+  private function getHost(): ?string
+  {
+    $request = $this->requestStack->getCurrentRequest();
+
+    if (!$request) {
+      return null;
+    }
+
+    return $request->getHost();
   }
 
   public function supports(): bool

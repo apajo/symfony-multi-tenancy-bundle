@@ -36,7 +36,7 @@ class Extension extends Base
 
     $bundles = $container->getParameter('kernel.bundles');
 
-    if (! isset($bundles['DoctrineBundle'])) {
+    if (!isset($bundles['DoctrineBundle'])) {
       throw new InvalidConfigurationException('DoctrineBundle is required by ' . APajoMultiTenancyBundle::class);
     }
 

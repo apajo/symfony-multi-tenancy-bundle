@@ -2,6 +2,7 @@
 
 namespace aPajo\MultiTenancyBundle\Adapter;
 
+use SensitiveParameter;
 use Symfony\Component\Mailer\Exception\InvalidArgumentException;
 
 final class Dsn
@@ -14,7 +15,7 @@ final class Dsn
   private ?string $path;
   private array $options;
 
-  public function __construct(string $scheme, string $host, ?string $user = null, #[\SensitiveParameter] ?string $password = null, ?int $port = null, ?string $path = null, array $options = [])
+  public function __construct(string $scheme, string $host, ?string $user = null, #[SensitiveParameter] ?string $password = null, ?int $port = null, ?string $path = null, array $options = [])
   {
     $this->scheme = $scheme;
     $this->host = $host;
@@ -25,7 +26,7 @@ final class Dsn
     $this->options = $options;
   }
 
-  public static function fromString(#[\SensitiveParameter] string $dsn): self
+  public static function fromString(#[SensitiveParameter] string $dsn): self
   {
     if (false === $params = parse_url($dsn)) {
       throw new InvalidArgumentException('The mailer DSN is invalid.');
@@ -98,7 +99,7 @@ final class Dsn
     if (!empty($this->options)) {
       $optionsArray = [];
       foreach ($this->options as $key => $value) {
-        $optionsArray[] = $key . '=' . rawurlencode((string) $value);
+        $optionsArray[] = $key . '=' . rawurlencode((string)$value);
       }
       $options = '?' . implode('&', $optionsArray);
     }

@@ -9,7 +9,7 @@ services:
   aPajo\MultiTenancyBundle\Adapter\Filesystem\FilesystemAdapter:
     arguments:
       - '@sonata.media.adapter.filesystem.local' # sonata.media.adapter.filesystem.ftp
-      
+  
   aPajo\MultiTenancyBundle\Adapter\Mailer\MailerAdapter:
     tags:
       - { name: mailer.transport_factory }
