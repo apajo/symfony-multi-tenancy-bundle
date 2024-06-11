@@ -30,6 +30,11 @@ The `aPajo\MultiTenancyBundle\Adapter\Mailer\MailerAdapter` requires the followi
   - `namespace`: The namespace for your migrations. For example, `App\Migrations\Tenant`.
   - `path`: The path to your migrations. For example, `'%kernel.project_dir%/migrations/tenant'`.
 
+## Adapters
+
+For more on (built-in) adapters see [Adapters directory](./src/Adapter/README.md)
+
+
 ## Known Issues
 
 Please refer to the "Issues" section of this repository for known issues and their status.
