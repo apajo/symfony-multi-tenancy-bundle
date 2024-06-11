@@ -2,21 +2,15 @@
 
 namespace aPajo\MultiTenancyBundle\Command\Migrations;
 
-use aPajo\MultiTenancyBundle\Entity\TenantInterface;
-use aPajo\MultiTenancyBundle\Service\EnvironmentProvider;
-use aPajo\MultiTenancyBundle\Service\TenantConfig;
-use aPajo\MultiTenancyBundle\Service\TenantManager;
-use Doctrine\Migrations\Configuration\EntityManager\ExistingEntityManager;
-use Doctrine\Migrations\Configuration\Migration\ConfigurationArray;
+use aPajo\MultiTenancyBundle\Migrations\Config;
 use Doctrine\Migrations\DependencyFactory;
+use Doctrine\Migrations\Tools\Console\Command\MigrateCommand as BaseCommand;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Doctrine\Migrations\Tools\Console\Command\MigrateCommand as BaseCommand;
+
 /**
  * Command for migrating tenant databases
  *
@@ -24,13 +18,21 @@ use Doctrine\Migrations\Tools\Console\Command\MigrateCommand as BaseCommand;
  */
 class MigrateCommand extends Command
 {
-    protected static $defaultName = 'tenants:migrations:migrate';
+  protected static $defaultName = 'tenants:migrations:migrate';
 
-    public function __construct(
-        protected EntityManagerInterface $entityManager
-    ) {
-        parent::__construct();
-    }
+  protected array $config;
+
+  public function setMigrationConfig(array $config): void
+  {
+    $this->config = $config;
+  }
+
+  public function __construct(
+    protected EntityManagerInterface $entityManager,
+    protected DependencyFactory $dependencyFactory,
+  ) {
+    parent::__construct();
+  }
 
     protected function configure()
     {
@@ -39,11 +41,11 @@ class MigrateCommand extends Command
             ->setHelp('This command allows you to proxy the doctrine:migrations:migrate command')
 
             // Add any options or arguments needed by the original command
+            ->addOption('em', null, InputOption::VALUE_OPTIONAL, 'The entity manager to use', 'default')
             ->addOption('version', null, InputOption::VALUE_OPTIONAL, 'The version to migrate to')
             ->addOption('write-sql', null, InputOption::VALUE_NONE, 'The path to output the migration SQL file instead of executing it')
             ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Execute the migration as a dry run')
             ->addOption('query-time', null, InputOption::VALUE_OPTIONAL, 'Time all queries individually')
-            ->addOption('em', null, InputOption::VALUE_OPTIONAL, 'The entity manager to use', 'default')
         ;
     }
 
@@ -58,8 +60,9 @@ class MigrateCommand extends Command
         $application = new Application();
         $application->add($this->migrateCommand);
 
-        // Get the migrate command
-        $command = $application->find('migrations:migrate');
+
+        // Create the MigrateCommand
+        $migrateCommand = new BaseCommand();
 
         // Create a new input instance to pass to the migrate command
         $inputArgs = [
@@ -78,6 +81,6 @@ class MigrateCommand extends Command
         $migrateInput = new \Symfony\Component\Console\Input\ArrayInput($inputArgs);
         $migrateInput->setInteractive(false);
 
-        return $command->run($migrateInput, $output);
+        return $migrateCommand->run($migrateInput, $output);
     }
 }

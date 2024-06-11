@@ -2,9 +2,14 @@
 
 namespace aPajo\MultiTenancyBundle\DependencyInjection;
 
+use aPajo\MultiTenancyBundle\APajoMultiTenancyBundle;
+use aPajo\MultiTenancyBundle\Command\Migrations\DiffCommand;
+use aPajo\MultiTenancyBundle\Command\Migrations\MigrateCommand;
+use aPajo\MultiTenancyBundle\Migrations\Config;
 use aPajo\MultiTenancyBundle\Service\Registry\AdapterRegistry;
 use aPajo\MultiTenancyBundle\Service\Registry\ResolverRegistry;
 use aPajo\MultiTenancyBundle\Service\TenantConfig;
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader;
@@ -28,6 +33,28 @@ class Extension extends Base
 
     $configuration = new Configuration();
     $cfg = $this->processConfiguration($configuration, $configs);
+
+    $bundles = $container->getParameter('kernel.bundles');
+
+    if (! isset($bundles['DoctrineBundle'])) {
+      throw new InvalidConfigurationException('DoctrineBundle is required by ' . APajoMultiTenancyBundle::class);
+    }
+
+    // Migration command configuration
+    if ($container->hasDefinition(DiffCommand::class)) {
+      $definition = $container->getDefinition(DiffCommand::class);
+      $definition->addMethodCall(
+        'setMigrationConfig',
+        [$cfg['migrations']]
+      );
+    }
+    if ($container->hasDefinition(MigrateCommand::class)) {
+      $definition = $container->getDefinition(MigrateCommand::class);
+      $definition->addMethodCall(
+        'setMigrationConfig',
+        [$cfg['migrations']]
+      );
+    }
 
     // Adapter registry
     if ($container->hasDefinition(AdapterRegistry::class)) {

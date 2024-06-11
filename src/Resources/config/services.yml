@@ -8,7 +8,15 @@ services:
   
   # Commands
   aPajo\MultiTenancyBundle\Command\:
-    resource: '../../Command/*'
+    resource: '../../Command/**'
+
+  aPajo\MultiTenancyBundle\Command\Migrations\DiffCommand:
+    arguments:
+      $dependencyFactory: '@doctrine.migrations.dependency_factory'
+
+  aPajo\MultiTenancyBundle\Command\Migrations\MigrateCommand:
+    arguments:
+      $dependencyFactory: '@doctrine.migrations.dependency_factory'
 
   # Services
   aPajo\MultiTenancyBundle\Service\:
