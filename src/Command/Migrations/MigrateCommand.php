@@ -16,7 +16,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-
+use Doctrine\Migrations\Tools\Console\Command\MigrateCommand as BaseCommand;
 /**
  * Command for migrating tenant databases
  *
@@ -26,12 +26,9 @@ class MigrateCommand extends Command
 {
     protected static $defaultName = 'tenants:migrations:migrate';
 
-
-    private $migrateCommand;
-
-    public function __construct(MigrateCommand $migrateCommand)
-    {
-        $this->migrateCommand = $migrateCommand;
+    public function __construct(
+        protected EntityManagerInterface $entityManager
+    ) {
         parent::__construct();
     }
 
