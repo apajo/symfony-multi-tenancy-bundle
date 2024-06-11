@@ -1,0 +1,16 @@
+apajo_multi_tenancy:
+  adapters: # Adapters dynamically change the system configuration for selected tenant
+    - aPajo\MultiTenancyBundle\Adapter\Database\DatabaseAdapter
+    - aPajo\MultiTenancyBundle\Adapter\Filesystem\FilesystemAdapter
+    - aPajo\MultiTenancyBundle\Adapter\Mailer\MailerAdapter
+  
+  tenant:                                   # Tenant (entity) configuration
+    class: Core\TenantBundle\Entity\Tenant  # Must implement TenantInterface
+    identifier: key                         # Identifier column name (must be unique field)
+    entity_manager: default                 # Tenant entity manager name
+    resolvers:                              # Resolvers resolve the tenant based on the request
+      - aPajo\MultiTenancyBundle\Service\Resolver\HostBasedResolver 
+      
+  migrations: # Migration configuration
+    namespace: App\Migrations\Tenant
+    entity_manager: tenant
