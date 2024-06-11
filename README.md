@@ -20,7 +20,58 @@ composer require apajo/symfony-multi-tenancy-bundle
 
 ## Configuration
 
-```bash
+### doctrine.yml
+
+You need 2 connections and entity_managers:
+
+```yaml
+doctrine:
+  dbal:
+    default_connection: default
+    connections:
+      default:
+        url: '%env(DEFAULT_DATABASE_URL)%'
+        driver: pdo_mysql
+        charset: utf8
+        server_version: '8'
+
+      tenant:
+        url: '%env(TENANT_DATABASE_URL)%'
+        driver:   pdo_mysql
+        charset:  utf8
+        server_version: '8'
+
+  orm:
+    default_entity_manager: default
+    auto_generate_proxy_classes: true
+    
+    entity_managers:
+      default:
+        connection: default
+        naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+
+      tenant:
+        connection: tenant
+        naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+        mappings:
+```
+
+In this case thay are named `default` and `tenant` but you can name them as you wish.
+
+Connection and the entity manager `tenant` is common for all the individual tenants.
+
+### doctrine_migrations.yml
+
+```yaml
+doctrine_migrations:
+  migrations_paths:
+    'App\Migrations\Default': '%kernel.project_dir%/migrations/default'
+    'App\Migrations\Tenant': '%kernel.project_dir%/migrations/tenant'
+```
+
+## Configuration
+
+```yaml
 apajo_multi_tenancy:
   adapters: # Adapters dynamically change the system configuration for selected tenant
     - aPajo\MultiTenancyBundle\Adapter\Database\DatabaseAdapter
@@ -28,7 +79,7 @@ apajo_multi_tenancy:
     - aPajo\MultiTenancyBundle\Adapter\Mailer\MailerAdapter
   
   tenant:                                   # Tenant (entity) configuration
-    class: App\Entity\Tenant  # Must implement TenantInterface
+    class: App\Entity\Tenant                # Must implement TenantInterface
     identifier: key                         # Identifier column name (must be unique field)
     entity_manager: default                 # Tenant entity manager name
     resolvers:                              # Resolvers resolve the tenant based on the request
