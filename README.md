@@ -1,5 +1,5 @@
 # Symfony Multi Tenancy Bundle
-
+  
 ## Description
 
 This bundles aim is to ease and automate multi tenancy in symfony.
@@ -8,6 +8,8 @@ It provides a way to dynamically change the system configuration based on the te
 ## Requirements
 
 - [Symfony 6.3 / 7](https://www.symfony.com/)
+- [Doctrine Bundle 2.12](https://github.com/doctrine/DoctrineBundle.git)
+- [Doctrine Migrations Bundle 3.3](https://github.com/doctrine/migrations.git)
 - [PHP 8.1](https://www.php.com/)
 
 ## Installation
