@@ -36,7 +36,9 @@ class DiffCommand extends Command
             ->addOption('filter-expression', null, InputOption::VALUE_OPTIONAL, 'Filter expression')
             ->addOption('formatted', null, InputOption::VALUE_NONE, 'To output formatted code')
             ->addOption('line-length', null, InputOption::VALUE_OPTIONAL, 'Max line length of generated code')
-            ->addOption('check-database-platform', null, InputOption::VALUE_NONE, 'Check database platform');
+            ->addOption('check-database-platform', null, InputOption::VALUE_NONE, 'Check database platform')
+            ->addOption('em', null, InputOption::VALUE_OPTIONAL, 'The entity manager to use', 'default')
+        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -60,6 +62,10 @@ class DiffCommand extends Command
             '--formatted' => $input->getOption('formatted'),
             '--line-length' => $input->getOption('line-length'),
             '--check-database-platform' => $input->getOption('check-database-platform'),
+
+            '--no-interaction' => '',
+            '--em' => $input->getOption('em'),
+            // '--namespace' => sprintf('config/migrations/%s.yml', $input->getOption('em')),
         ];
 
         $diffInput = new \Symfony\Component\Console\Input\ArrayInput($inputArgs);
