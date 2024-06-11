@@ -1,0 +1,3 @@
+migrations_paths:
+  'App\Migrations\Tenant': 'migrations/tenant'
+  
