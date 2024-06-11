@@ -71,6 +71,9 @@ class MigrateCommand extends Command
             '--write-sql' => $input->getOption('write-sql'),
             '--dry-run' => $input->getOption('dry-run'),
             '--query-time' => $input->getOption('query-time'),
+
+            '--all-or-nothing' => '',
+            '--no-interaction' => '',
             '--em' => $input->getOption('em'),
             '--configuration' => sprintf('config/migrations/%s.yml', $input->getOption('em')),
         ];
