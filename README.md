@@ -20,17 +20,24 @@ composer require apajo/symfony-multi-tenancy-bundle
 
 ## Configuration
 
-The `aPajo\MultiTenancyBundle\Adapter\Mailer\MailerAdapter` requires the following configuration:
-
-- `tenant`: This section is for configuring the Tenant entity.
-  - `class`: The class of your Tenant entity. It must implement the `TenantInterface`. For example, `App\Entity\Tenant`.
-  - `identifier`: The name of the unique identifier column in your Tenant entity. For example, `key`.
-  - `entity_manager`: The name of the entity manager for your Tenant entity. The default is `default`.
-  - `resolvers`: These are the services that resolve the tenant based on the request. For example, `aPajo\MultiTenancyBundle\Service\Resolver\HostBasedResolver`.
-
-- `migrations`: This section is for configuring migrations.
-  - `namespace`: The namespace for your migrations. For example, `App\Migrations\Tenant`.
-  - `path`: The path to your migrations. For example, `'%kernel.project_dir%/migrations/tenant'`.
+```bash
+apajo_multi_tenancy:
+  adapters: # Adapters dynamically change the system configuration for selected tenant
+    - aPajo\MultiTenancyBundle\Adapter\Database\DatabaseAdapter
+    - aPajo\MultiTenancyBundle\Adapter\Filesystem\FilesystemAdapter
+    - aPajo\MultiTenancyBundle\Adapter\Mailer\MailerAdapter
+  
+  tenant:                                   # Tenant (entity) configuration
+    class: App\Entity\Tenant  # Must implement TenantInterface
+    identifier: key                         # Identifier column name (must be unique field)
+    entity_manager: default                 # Tenant entity manager name
+    resolvers:                              # Resolvers resolve the tenant based on the request
+      - aPajo\MultiTenancyBundle\Service\Resolver\HostBasedResolver 
+      
+  migrations: # Migration configuration
+    namespace: App\Migrations\Tenant
+    entity_manager: tenant
+```
 
 ## Adapters
 
