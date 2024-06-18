@@ -1,7 +1,6 @@
 # Resolvers
 
-Resolvers are responsible for resolving the tenant based on the system sate (request etc).
-
+Resolvers are responsible for resolving current tenant.
 
 The TenantManager iterates over all resolvers until a resolver returns a non-null value.
 

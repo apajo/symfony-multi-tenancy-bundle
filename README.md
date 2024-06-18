@@ -102,12 +102,11 @@ For more on (built-in) adapters see [Adapters directory](./src/Adapter/README.md
 
 ## Resolvers
 
-Resolvers are responsible for resolving the tenant based on the request.
+Resolvers are responsible for resolving current tenant.
 
-For more on (built-in) adapters see [Adapters directory](./src/Service/Resolver/README.md)
+For more on (built-in) resolvers see [Resolvers directory](./src/Service/Resolver/README.md)
 
 ## Database migrations
-
 
 ### Create migration (or diff)
 
