@@ -178,6 +178,10 @@ Feel free to report an issue [under GitHub Issues](https://github.com/apajo/symf
 
 * Resetting to default/initial tenant does not work
 
+## Contributing
+
+Feel free to [contribute](https://github.com/apajo/symfony-multi-tenancy-bundle/pulls)
+
 ### Thanks to
 
 This bundle is inspired by the [RamyHakam / multi_tenancy_bundle](https://github.com/RamyHakam/multi_tenancy_bundle)
