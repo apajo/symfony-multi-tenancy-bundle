@@ -59,10 +59,5 @@
             "aPajo\\MultiTenancyBundle\\Tests\\": "tests/"
         }
     },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "0.x-dev"
-        }
-    },
     "minimum-stability": "stable"
 }
