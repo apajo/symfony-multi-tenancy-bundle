@@ -2,8 +2,8 @@
 
 namespace aPajo\MultiTenancyBundle\Adapter;
 
+use aPajo\MultiTenancyBundle\Exception\InvalidArgumentException;
 use SensitiveParameter;
-use Symfony\Component\Mailer\Exception\InvalidArgumentException;
 
 final class Dsn
 {

@@ -101,6 +101,7 @@ class EnvironmentProvider
   {
     $tenant = $event->getTenant();
 
+    // TODO: implement null-tenant handling
     if (!$tenant) {
       return;
     }
