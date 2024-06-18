@@ -106,6 +106,28 @@ Resolvers are responsible for resolving the tenant based on the request.
 
 For more on (built-in) adapters see [Adapters directory](./src/Service/Resolver/README.md)
 
+## Database migrations
+
+
+### Create migration (or diff)
+
+```shell
+php bin/console tenants:migrations:diff
+```
+
+### Migrate tenants
+
+```shell
+php bin/console tenants:migrations:migrate:all
+```
+
+### Migrate a single tenant
+
+```shell
+# TODO: Implement
+# php bin/console tenants:migrations:migrate [tenant_id]
+```
+
 ## Examples
 
 ### Switch/select tenant
