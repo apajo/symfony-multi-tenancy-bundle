@@ -11,7 +11,7 @@ It provides a way to dynamically change the system configuration based on the te
 - [Doctrine Bundle 2.12](https://github.com/doctrine/DoctrineBundle.git)
 - [Doctrine Migrations Bundle 3.3](https://github.com/doctrine/migrations.git)
 - [Symfony Security Bundley 6.3 / 7](https://symfony.com/components/Security%20Bundle)
-- [PHP 8.1](https://www.php.com/)
+- [PHP 8.2](https://www.php.com/)
 
 ## Installation
 
