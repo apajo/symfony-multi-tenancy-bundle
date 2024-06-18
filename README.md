@@ -100,7 +100,55 @@ Adapters are responsible for dynamic configuration changes based on tenant table
 
 For more on (built-in) adapters see [Adapters directory](./src/Adapter/README.md)
 
+## Resolvers
+
+Resolvers are responsible for resolving the tenant based on the request.
+
+For more on (built-in) adapters see [Adapters directory](./src/Service/Resolver/README.md)
+
 ## Examples
+
+### Switch/select tenant
+
+```php
+use aPajo\MultiTenancyBundle\Service\EnvironmentProvider;
+use aPajo\MultiTenancyBundle\Entity\TenantInterface;
+use aPajo\MultiTenancyBundle\Event\TenantSelectEvent;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface
+
+class Tenant implements TenantInterface {
+    // ...
+}
+
+class MyTenantService {
+  public function __construct (
+    private EnvironmentProvider $environmentProvider,
+    private EventDispatcherInterface $dispatcher,
+  ) {
+  }
+  
+  
+  /**
+   * Use the EnvironmentProvider to select a different tenant
+   */
+  public function select () {
+    $tenant = new Tenant();
+    
+    $environmentProvider->select($tenant);
+    // Now the system is configured based on the tenant
+  }
+
+  /**
+   * You can also dispatch an event to select a new tenant
+   */
+  public function alternativeSelect () {
+      $tenant = new Tenant();
+      
+      $event = new TenantSelectEvent($tenant);
+      $this->dispatcher->dispatch($event);
+  }
+}
+```
 
 ### Iterate over all tenant environments
 
@@ -122,8 +170,9 @@ class MyTenantService {
 }
 ```
 
-
 ## Issues
+
+Feel free to report an issue [under GitHub Issues](https://github.com/apajo/symfony-multi-tenancy-bundle/issues)
 
 ### Known Issues
 

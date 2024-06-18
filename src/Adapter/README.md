@@ -1,4 +1,4 @@
-# Adapters (Symfony Multi Tenancy Bundle)
+# Adapters
 
 Adapters are responsible for dynamic configuration changes based on tenant table values at runtime.
 
