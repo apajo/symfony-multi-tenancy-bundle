@@ -8,7 +8,6 @@ class UnitTest extends TestCase
 {
   public function testUnitTest()
   {
-    dump('testUnitTest');
     self::assertTrue(true);
   }
 }

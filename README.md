@@ -58,7 +58,10 @@ doctrine:
 
 In this case thay are named `default` and `tenant` but you can name them as you wish.
 
-Connection and the entity manager `tenant` is common for all the individual tenants.
+> __NB!__ Third party packages may require the `default` connection to be present so you might want to keep the `default` name.
+
+Connection and entity manager `default` are common for all the individual tenants.
+Connection and entity manager `tenant` are specific for the tenant.
 
 ### doctrine_migrations.yml
 
@@ -92,12 +95,38 @@ apajo_multi_tenancy:
 
 ## Adapters
 
+Adapters are responsible for dynamic configuration changes based on tenant table values at runtime.
+
 For more on (built-in) adapters see [Adapters directory](./src/Adapter/README.md)
 
+## Examples
 
-## Known Issues
+### Iterate over all tenant environments
 
-Please refer to the "Issues" section of this repository for known issues and their status.
+```php
+use aPajo\MultiTenancyBundle\Service\EnvironmentProvider;
+use aPajo\MultiTenancyBundle\Entity\TenantInterface;
+
+class MyTenantService {
+  public function __construct (
+    private EnvironmentProvider $environmentProvider,
+  ) {
+  
+    $environmentProvider->forAll(function (TenantInterface $tenant) {
+      // Each iteration will have tenant specific configuration/environment
+    });
+    
+  }
+
+}
+```
+
+
+## Issues
+
+### Known Issues
+
+* Resetting to default/initial tenant does not work
 
 ### Thanks to
 
