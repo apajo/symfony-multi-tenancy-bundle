@@ -12,9 +12,9 @@ use Symfony\Component\Security\Core\User\UserInterface;
 class HostBasedResolver implements TenantResolverInterface
 {
   public function __construct(
-    private RequestStack $requestStack,
-    private TokenStorage $tokenstorage,
-    private TenantConfig $config,
+    protected RequestStack $requestStack,
+    protected TokenStorage $tokenstorage,
+    protected TenantConfig $config,
   )
   {
   }
