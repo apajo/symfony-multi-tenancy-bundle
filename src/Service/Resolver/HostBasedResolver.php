@@ -68,12 +68,12 @@ class HostBasedResolver implements TenantResolverInterface
     return $user;
   }
 
-  private function resolveByCrits(array $crits): ?TenantInterface
+  protected function resolveByCrits(array $crits): ?TenantInterface
   {
     return $this->config->getRepository()->findOneBy($crits);
   }
 
-  private function getHost(): ?string
+  protected function getHost(): ?string
   {
     $request = $this->requestStack->getCurrentRequest();
 
