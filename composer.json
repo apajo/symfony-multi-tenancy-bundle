@@ -1,11 +1,16 @@
 {
     "name": "apajo/symfony-multi-tenancy-bundle",
     "type": "symfony-bundle",
-    "description": "Multi tenancy bundle for Symfony",
+    "description": "Symfony multi tenancy bundle",
     "keywords": [
-        "symfony",
-        "tenants",
-        "multi-tenancy"
+        "Symfony",
+        "Doctrine",
+        "Tenants",
+        "Multi-tenancy",
+        "Dynamic tenant configuration",
+        "Saas",
+        "Software-as-a-Service",
+        "Host based multi tenancy"
     ],
     "homepage": "https://www.apajo.ee",
     "license": "MIT",

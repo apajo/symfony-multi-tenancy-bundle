@@ -2,8 +2,16 @@
   
 ## Description
 
-This bundles aim is to ease and automate multi tenancy in symfony.
-It provides a way to dynamically change the system configuration based on the tenant (database, media, smtp etc).
+There are many packages that provide multi tenancy in Symfony
+but all of them focus on the database.
+This package's goal is to provide a way to manage any kind of configuration in your system.
+
+This bundle aims to provide multi tenancy on a higher level. It provides a way to dynamically
+change the system configuration based on the tenant (database, media provider, mailer etc).
+
+It also bundles a way to manage migrations for each tenant.
+
+The package's development is in early stages, any feedback is welcome.
 
 ## Requirements
 
