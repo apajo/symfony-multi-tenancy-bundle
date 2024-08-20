@@ -44,10 +44,10 @@ class FilesystemAdapter extends Filesystem implements PropertyAdapterInterface
         'password' => $dsn->getPassword(),
         'port' => $dsn->getPort(21),
         'root' => $dsn->getPath('/'),
-        'create' => true,
-        'passive' => true,
-        'ssl' => true,
-        'timeout' => 5,
+        'create' => $dsn->getOption('create', true),
+        'passive' => $dsn->getOption('passive', true),
+        'ssl' => $dsn->getOption('ssl', true),
+        'timeout' => $dsn->getOption('timeout', 5),
       ]
     );
 

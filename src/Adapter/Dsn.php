@@ -29,23 +29,29 @@ final class Dsn
   public static function fromString(#[SensitiveParameter] string $dsn): self
   {
     if (false === $params = parse_url($dsn)) {
-      throw new InvalidArgumentException('The mailer DSN is invalid.');
+      throw new InvalidArgumentException('The DSN is invalid.');
     }
 
     if (!isset($params['scheme'])) {
-      throw new InvalidArgumentException('The mailer DSN must contain a scheme.');
+      throw new InvalidArgumentException('The DSN must contain a scheme.');
     }
 
     if (!isset($params['host'])) {
-      throw new InvalidArgumentException('The mailer DSN must contain a host (use "default" by default).');
+      throw new InvalidArgumentException('The DSN must contain a host (use "default" by default).');
     }
 
     $user = '' !== ($params['user'] ?? '') ? rawurldecode($params['user']) : null;
     $password = '' !== ($params['pass'] ?? '') ? rawurldecode($params['pass']) : null;
     $port = $params['port'] ?? null;
     $path = $params['path'] ?? null;
+    $options = [];
 
-    return new self($params['scheme'], $params['host'], $user, $password, $port, $path);
+    if (isset($params['query'])) {
+      parse_str($params['query'], $output);
+      $options = $output ?: [];
+    }
+
+    return new self($params['scheme'], $params['host'], $user, $password, $port, $path, $options);
   }
 
   public function getScheme(): string
