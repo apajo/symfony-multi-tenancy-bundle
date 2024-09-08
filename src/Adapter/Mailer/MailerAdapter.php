@@ -26,7 +26,14 @@ class MailerAdapter extends AbstractTransportFactory implements PropertyAdapterI
 
   public function create(MailerDsn $dsn): TransportInterface
   {
-    $this->doAdapt($dsn);
+    $this->doAdapt(new Dsn(
+      $dsn->getScheme(),
+      $dsn->getHost(),
+      $dsn->getUser(),
+      $dsn->getPassword(),
+      $dsn->getPort()
+    ));
+
     return $this->transport;
   }
 
