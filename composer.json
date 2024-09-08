@@ -65,5 +65,7 @@
         "psr-4": {
             "aPajo\\MultiTenancyBundle\\Tests\\": "tests/"
         }
-    }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
