@@ -36,7 +36,7 @@ class MigrateCommand extends Command
       ->setName('tenants:migrations:migrate:all')
       ->setAliases(['t:m:m:a'])
       ->setDescription('Proxy to launch doctrine:migrations:migrate for all tenant databases .')
-      ->addArgument('tenant_id', InputArgument::OPTIONAL, 'Tenant Identifier', null)
+      ->addArgument('tenant_id', InputArgument::OPTIONAL, 'Tenant key/dentifier', null)
       ->addArgument('version', InputArgument::OPTIONAL, 'The version number (YYYYMMDDHHMMSS) or alias (first, prev, next, latest) to migrate to.', 'latest')
       ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Execute the migration as a dry run.')
       ->addOption('query-time', null, InputOption::VALUE_NONE, 'Time all the queries individually.')
@@ -45,11 +45,14 @@ class MigrateCommand extends Command
 
   protected function execute(InputInterface $input, OutputInterface $output): int
   {
-    $total = $this->tenantManager->findAll()->count();
-    $output->writeln("Total of {$total} tenants found.");
+    $tenantKey = $input->getArgument('tenant_id');
 
-    $this->tenantManager->findAll()->forAll(function (TenantInterface $tenant) use ($output) {
+    $this->tenantManager->findAll()->forAll(function (int $index, TenantInterface $tenant) use ($output, $tenantKey) {
       $id = $this->tenantConfig->getTenantIdentifier($tenant);
+
+      if ($tenantKey !== $id) {
+        return;
+      }
 
       $output->writeln("Migrating tenant {$id} ...");
       $output->writeln("==================================================");
