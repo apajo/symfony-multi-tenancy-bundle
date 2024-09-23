@@ -33,9 +33,8 @@ class MigrateCommand extends Command
   protected function configure(): void
   {
     $this
-      ->setName('tenants:migrations:migrate:all')
-      ->setAliases(['t:m:m:a'])
-      ->setDescription('Proxy to launch doctrine:migrations:migrate for all tenant databases .')
+      ->setName('tenants:migrations:migrate')
+      ->setDescription('Proxy to launch doctrine:migrations:migrate for (all) tenant databases .')
       ->addArgument('tenant_id', InputArgument::OPTIONAL, 'Tenant key/dentifier', null)
       ->addArgument('version', InputArgument::OPTIONAL, 'The version number (YYYYMMDDHHMMSS) or alias (first, prev, next, latest) to migrate to.', 'latest')
       ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Execute the migration as a dry run.')
@@ -47,18 +46,25 @@ class MigrateCommand extends Command
   {
     $tenantKey = $input->getArgument('tenant_id');
 
-    $this->tenantManager->findAll()->forAll(function (int $index, TenantInterface $tenant) use ($output, $tenantKey) {
+    /** @var TenantInterface $tenant */
+    foreach ($this->tenantManager->findAll() as $tenant) {
       $id = $this->tenantConfig->getTenantIdentifier($tenant);
 
-      if ($tenantKey !== $id) {
-        return;
+      if ($tenantKey !== $id && $tenantKey !== null) {
+        continue;
       }
 
       $output->writeln("Migrating tenant {$id} ...");
       $output->writeln("==================================================");
 
-      $this->migrationManager->migrate($tenant);
-    });
+      try {
+        $this->migrationManager->migrate($tenant);
+      } catch (\Throwable $exception) {
+        $output->writeln("Migration failed for tenant {$id}: " . $exception->getMessage());
+      }
+
+
+    }
 
     $output->writeln("Done!");
 
