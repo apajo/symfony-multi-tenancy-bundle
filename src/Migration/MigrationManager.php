@@ -3,6 +3,7 @@
 namespace aPajo\MultiTenancyBundle\Migration;
 
 use aPajo\MultiTenancyBundle\Entity\TenantInterface;
+use aPajo\MultiTenancyBundle\Service\EnvironmentProvider;
 use Doctrine\Migrations\DependencyFactory;
 use Doctrine\Migrations\Tools\Console\Command\MigrateCommand;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
@@ -23,48 +24,58 @@ class MigrationManager
   public function __construct(
     private KernelInterface          $kernel,
     protected DependencyFactory      $dependencyFactory,
+    private EnvironmentProvider      $environmentProvider,
   )
   {
   }
 
   public function migrate(TenantInterface $tenant): bool
   {
-    dump($tenant);
-    return true;
-    $output = new BufferedOutput();
+    $this->environmentProvider->for($tenant, function (TenantInterface $tenant) {
+      $output = new BufferedOutput();
+      $newInput = new ArrayInput([
+        'version' => 'latest',
+        '--dry-run' => false,
+        '--all-or-nothing'  => false,
+        '--em' => 'default',
+        '--configuration' => 'config/migrations/default.yml'
+//        '--query-time' => $input->getOption('query-time'),
+//        '--allow-no-migration' => $input->getOption('allow-no-migration'),
+      ]);
 
-    $exitCode = $this->migrateWithIO($tenant, new ArrayInput([
-      'version' => 'latest',
-      '--dry-run' => false,
-      '--query-time' => false,
-      '--allow-no-migration' => true,
-    ], new InputDefinition([
-      new InputArgument('version', InputArgument::OPTIONAL),
-      new InputOption('dry-run', null, InputOption::VALUE_NONE),
-      new InputOption('query-time', null, InputOption::VALUE_NONE),
-      new InputOption('allow-no-migration', null, InputOption::VALUE_NONE),
-    ])), $output);
+      $newInput->setInteractive(false);
+      $otherCommand = new MigrateCommand($this->dependencyFactory);
+      $otherCommand->run($newInput, $output);
+    });
 
-    return $exitCode === 0;
+    return 0;
   }
 
   public function migrateWithIO(TenantInterface $tenant, InputInterface $input, OutputInterface $output = null): int
   {
-    $newInput = new ArrayInput([
+    $newInput = new ArrayInput(
+      [
       'command' => 'tenant:migrations:migrate',
 //      'dbId' => $tenant->getKey(),
       'version' => $input->getArgument('version'),
       '--dry-run' => $input->getOption('dry-run'),
       '--query-time' => $input->getOption('query-time'),
       '--allow-no-migration' => $input->getOption('allow-no-migration'),
-    ], new InputDefinition([
-      new InputArgument('command', InputArgument::OPTIONAL),
-//      new InputArgument('dbId', InputArgument::OPTIONAL),
-      new InputArgument('version', InputArgument::OPTIONAL),
-      new InputOption('dry-run', null, InputOption::VALUE_NONE),
-      new InputOption('query-time', null, InputOption::VALUE_NONE),
-      new InputOption('allow-no-migration', null, InputOption::VALUE_NONE),
-    ]));
+      '--all-or-nothing'  => true,
+      '--em' => 'default',
+      '--configuration' => 'config/migrations/default.yml'
+    ],
+      new InputDefinition([
+        new InputArgument('command', InputArgument::OPTIONAL),
+  //      new InputArgument('dbId', InputArgument::OPTIONAL),
+        new InputArgument('version', InputArgument::OPTIONAL),
+        new InputOption('dry-run', null, InputOption::VALUE_NONE),
+        new InputOption('query-time', null, InputOption::VALUE_NONE),
+        new InputOption('allow-no-migration', null, InputOption::VALUE_NONE),
+      ]
+      )
+    );
+
     $newInput->setInteractive(false);
 
     $application = new Application($this->kernel);
@@ -82,5 +93,10 @@ class MigrationManager
   public function setMigrationConfig(array $config): void
   {
     $this->config = $config;
+  }
+
+  public function createArrayInput(array $inputs): void
+  {
+
   }
 }
