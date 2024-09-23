@@ -45,12 +45,6 @@ class MigrateCommand extends Command
 
   protected function execute(InputInterface $input, OutputInterface $output): int
   {
-
-    dump([
-      $input->getArguments(),
-      $input->getArgument('tenant_id')
-    ]);
-
     $total = $this->tenantManager->findAll()->count();
     $output->writeln("Total of {$total} tenants found.");
 
