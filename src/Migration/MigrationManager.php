@@ -41,7 +41,6 @@ class MigrationManager
 
       $newInput->setInteractive(false);
       $migrateCommand = new MigrateCommand($this->dependencyFactory);
-      // $exitCode = $migrateCommand->run($newInput, $output);
 
       $application = new Application($this->kernel);
       $application->setAutoExit(false);
