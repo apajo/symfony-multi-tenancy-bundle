@@ -1,5 +1,6 @@
 imports:
   - { resource: "adapters.yml" }
+  - { resource: "migration.yml" }
 
 services:
   _defaults:
@@ -7,16 +8,8 @@ services:
     autoconfigure: true
   
   # Commands
-  aPajo\MultiTenancyBundle\Command\:
-    resource: '../../Command/**'
-
-  aPajo\MultiTenancyBundle\Command\Migrations\DiffCommand:
-    arguments:
-      $dependencyFactory: '@doctrine.migrations.dependency_factory'
-
-  aPajo\MultiTenancyBundle\Command\Migrations\MigrateCommand:
-    arguments:
-      $dependencyFactory: '@doctrine.migrations.dependency_factory'
+#  aPajo\MultiTenancyBundle\Command\:
+#    resource: '../../Command/**'
 
   # Services
   aPajo\MultiTenancyBundle\Service\:
@@ -29,4 +22,3 @@ services:
       $tokenstorage: '@security.untracked_token_storage'
 
   aPajo\MultiTenancyBundle\Event\Listener\RequestListener:
-

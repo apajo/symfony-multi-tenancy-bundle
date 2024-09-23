@@ -1,0 +1,14 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+  
+  aPajo\MultiTenancyBundle\Migration\Command\DiffCommand:
+    arguments:
+      $dependencyFactory: '@doctrine.migrations.dependency_factory'
+
+  aPajo\MultiTenancyBundle\Migration\Command\MigrateCommand:
+
+  aPajo\MultiTenancyBundle\Migration\MigrationManager:
+    arguments:
+      $dependencyFactory: '@doctrine.migrations.dependency_factory'

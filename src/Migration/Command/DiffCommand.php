@@ -1,6 +1,6 @@
 <?php
 
-namespace aPajo\MultiTenancyBundle\Command\Migrations;
+namespace aPajo\MultiTenancyBundle\Migration\Command;
 
 use Doctrine\Migrations\DependencyFactory;
 use Doctrine\Migrations\Tools\Console\Command\DiffCommand as BaseCommand;

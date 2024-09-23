@@ -1,15 +1,13 @@
 <?php
 
-namespace aPajo\MultiTenancyBundle\Command;
+namespace aPajo\MultiTenancyBundle\Migration\Command;
 
 use aPajo\MultiTenancyBundle\Entity\TenantInterface;
-use aPajo\MultiTenancyBundle\Service\EnvironmentProvider;
-use aPajo\MultiTenancyBundle\Service\TenantConfig;
+use aPajo\MultiTenancyBundle\Migration\MigrationManager;
 use aPajo\MultiTenancyBundle\Service\TenantManager;
 use Doctrine\Migrations\Configuration\EntityManager\ExistingEntityManager;
 use Doctrine\Migrations\Configuration\Migration\ConfigurationArray;
 use Doctrine\Migrations\DependencyFactory;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
@@ -24,12 +22,11 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class MigrateCommand extends Command
 {
+  protected array $config;
 
   public function __construct(
-    private TenantManager          $tenantManager,
-    private EnvironmentProvider    $environmentProvider,
-    private TenantConfig           $tenantConfig,
-    private EntityManagerInterface $em
+    private MigrationManager $migrationManager,
+    private TenantManager $tenantManager,
   )
   {
     parent::__construct();
@@ -41,6 +38,7 @@ class MigrateCommand extends Command
       ->setName('tenants:migrations:migrate:all')
       ->setAliases(['t:m:m:a'])
       ->setDescription('Proxy to launch doctrine:migrations:migrate for all tenant databases .')
+      ->addArgument('tenant_id', InputArgument::OPTIONAL, 'Tenant Identifier')
       ->addArgument('version', InputArgument::OPTIONAL, 'The version number (YYYYMMDDHHMMSS) or alias (first, prev, next, latest) to migrate to.', 'latest')
       ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Execute the migration as a dry run.')
       ->addOption('query-time', null, InputOption::VALUE_NONE, 'Time all the queries individually.')
@@ -52,41 +50,19 @@ class MigrateCommand extends Command
     $total = $this->tenantManager->findAll()->count();
     $output->writeln("Total of {$total} tenants found.");
 
-
-    $this->environmentProvider->forAll(function (TenantInterface $tenant, EntityManagerInterface $em) use ($input, $output, $total) {
+    $this->tenantManager->findAll()->forAll(function (TenantInterface $tenant) use ($output) {
       $id = $this->tenantConfig->getTenantIdentifier($tenant);
+
       $output->writeln("Migrating tenant {$id} ...");
       $output->writeln("==================================================");
 
-      $this->migrate($input, $output);
+      $this->migrationManager->migrate($tenant);
     });
-
 
     $output->writeln("Done!");
 
     return 0;
   }
 
-  protected function migrate(InputInterface $input, OutputInterface $output): int
-  {
-    $newInput = new ArrayInput([
-      'version' => $input->getArgument('version'),
-      '--dry-run' => $input->getOption('dry-run'),
-      '--query-time' => $input->getOption('query-time'),
-      '--allow-no-migration' => $input->getOption('allow-no-migration'),
-    ]);
-
-    $newInput->setInteractive($input->isInteractive());
-
-    $tenantMigrationConfig = new ConfigurationArray([]);
-
-    $depFactory = DependencyFactory::fromEntityManager(
-      $tenantMigrationConfig,
-      new ExistingEntityManager($this->em)
-    );
-
-    $otherCommand = new \Doctrine\Migrations\Tools\Console\Command\MigrateCommand($depFactory);
-    return $otherCommand->run($newInput, $output);
-  }
 
 }
