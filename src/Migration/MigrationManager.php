@@ -5,7 +5,6 @@ namespace aPajo\MultiTenancyBundle\Migration;
 use aPajo\MultiTenancyBundle\Entity\TenantInterface;
 use aPajo\MultiTenancyBundle\Service\EnvironmentProvider;
 use aPajo\MultiTenancyBundle\Service\TenantConfig;
-use aPajo\MultiTenancyBundle\Service\TenantManager;
 use Doctrine\Migrations\DependencyFactory;
 use Doctrine\Migrations\Tools\Console\Command\MigrateCommand;
 use Doctrine\ORM\EntityManagerInterface;
@@ -37,7 +36,7 @@ class MigrationManager
     $crits[$col] = $key;
 
     return $this->migrate(
-      $repo->findBy($crits)
+      $repo->findOneBy($crits)
     );
   }
 
