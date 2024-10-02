@@ -4,6 +4,8 @@ namespace aPajo\MultiTenancyBundle\Migration;
 
 use aPajo\MultiTenancyBundle\Entity\TenantInterface;
 use aPajo\MultiTenancyBundle\Service\EnvironmentProvider;
+use aPajo\MultiTenancyBundle\Service\TenantConfig;
+use aPajo\MultiTenancyBundle\Service\TenantManager;
 use Doctrine\Migrations\DependencyFactory;
 use Doctrine\Migrations\Tools\Console\Command\MigrateCommand;
 use Doctrine\ORM\EntityManagerInterface;
@@ -21,8 +23,22 @@ class MigrationManager
     private KernelInterface          $kernel,
     protected DependencyFactory      $dependencyFactory,
     private EnvironmentProvider      $environmentProvider,
+    private TenantConfig             $tenantConfig,
   )
   {
+  }
+
+  public function migrateByKey(string $key): bool
+  {
+    $col = $this->tenantConfig->getTenantIdentifierColumn();
+    $repo = $this->tenantConfig->getRepository();
+
+    $crits = [];
+    $crits[$col] = $key;
+
+    return $this->migrate(
+      $repo->findBy($crits)
+    );
   }
 
   public function migrate(TenantInterface $tenant): bool
