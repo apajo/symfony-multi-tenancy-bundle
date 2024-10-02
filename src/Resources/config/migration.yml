@@ -10,5 +10,6 @@ services:
   aPajo\MultiTenancyBundle\Migration\Command\MigrateCommand:
 
   aPajo\MultiTenancyBundle\Migration\MigrationManager:
+    public: true
     arguments:
       $dependencyFactory: '@doctrine.migrations.dependency_factory'
