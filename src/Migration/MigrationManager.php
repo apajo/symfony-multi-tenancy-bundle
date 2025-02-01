@@ -8,6 +8,7 @@ use aPajo\MultiTenancyBundle\Service\TenantConfig;
 use Doctrine\Migrations\DependencyFactory;
 use Doctrine\Migrations\Tools\Console\Command\MigrateCommand;
 use Doctrine\ORM\EntityManagerInterface;
+use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
@@ -19,10 +20,10 @@ class MigrationManager
 
 
   public function __construct(
-    private KernelInterface          $kernel,
-    protected DependencyFactory      $dependencyFactory,
-    private EnvironmentProvider      $environmentProvider,
-    private TenantConfig             $tenantConfig,
+    private KernelInterface     $kernel,
+    protected DependencyFactory $dependencyFactory,
+    private EnvironmentProvider $environmentProvider,
+    private TenantConfig        $tenantConfig,
   )
   {
   }
@@ -46,10 +47,11 @@ class MigrationManager
       $output = new BufferedOutput();
       $newInput = new ArrayInput([
         //'version' => 'latest',
-        '--dry-run' => false,
-        '--all-or-nothing'  => false,
+        '--dry-run' => true,
+        '--all-or-nothing' => true,
+        '--no-interaction' => true,
         '--em' => 'tenant',
-        '--configuration' => 'config/migrations/tenant.yml'
+        '--configuration' => 'vendor/apajo/symfony-multi-tenancy-bundle/config/migrations/tenant.yml'
 //        '--query-time' => $input->getOption('query-time'),
 //        '--allow-no-migration' => $input->getOption('allow-no-migration'),
       ]);
@@ -62,7 +64,7 @@ class MigrationManager
       $exitCode = $application->add($migrateCommand)->run($newInput, $output);
 
       if ($exitCode !== 0) {
-        throw new \RuntimeException('Migration failed');
+        throw new RuntimeException('Migration failed');
       }
     });
 

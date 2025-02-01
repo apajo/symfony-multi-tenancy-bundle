@@ -7,14 +7,8 @@ services:
     autowire: true
     autoconfigure: true
   
-  # Commands
-#  aPajo\MultiTenancyBundle\Command\:
-#    resource: '../../Command/**'
-
-  # Services
   aPajo\MultiTenancyBundle\Service\:
     resource: '../../Service/*'
-  #    exclude: '../../Service/*'
   
   aPajo\MultiTenancyBundle\Service\Resolver\HostBasedResolver:
     arguments:

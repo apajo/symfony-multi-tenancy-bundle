@@ -6,14 +6,22 @@ use aPajo\MultiTenancyBundle\Entity\TenantInterface;
 use aPajo\MultiTenancyBundle\Migration\MigrationManager;
 use aPajo\MultiTenancyBundle\Service\TenantConfig;
 use aPajo\MultiTenancyBundle\Service\TenantManager;
+use Doctrine\Migrations\DependencyFactory;
+use Doctrine\Migrations\Tools\Console\Command\MigrateCommand as DoctrineMigrateCommand;
+use RuntimeException;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\HttpKernel\KernelInterface;
+use Throwable;
 
 /**
- * Command for migrating all tenant databases
+ * Command for migrating (all) tenant databases
  *
  * @author Andres Pajo <andres@apajo.ee>
  */
@@ -22,9 +30,11 @@ class MigrateCommand extends Command
   protected array $config;
 
   public function __construct(
-    private MigrationManager $migrationManager,
-    private TenantManager $tenantManager,
-    private TenantConfig $tenantConfig
+    private MigrationManager    $migrationManager,
+    private TenantManager       $tenantManager,
+    private TenantConfig        $tenantConfig,
+    private KernelInterface     $kernel,
+    protected DependencyFactory $dependencyFactory,
   )
   {
     parent::__construct();
@@ -35,7 +45,7 @@ class MigrateCommand extends Command
     $this
       ->setName('tenants:migrations:migrate')
       ->setDescription('Proxy to launch doctrine:migrations:migrate for (all) tenant databases .')
-      ->addArgument('tenant_id', InputArgument::OPTIONAL, 'Tenant key/dentifier', null)
+      ->addArgument('tenant_id', InputArgument::OPTIONAL, 'Tenant key/dentifier')
       ->addArgument('version', InputArgument::OPTIONAL, 'The version number (YYYYMMDDHHMMSS) or alias (first, prev, next, latest) to migrate to.', 'latest')
       ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Execute the migration as a dry run.')
       ->addOption('query-time', null, InputOption::VALUE_NONE, 'Time all the queries individually.')
@@ -44,6 +54,8 @@ class MigrateCommand extends Command
 
   protected function execute(InputInterface $input, OutputInterface $output): int
   {
+    $this->migrateDefaultDatabase();
+
     $tenantKey = $input->getArgument('tenant_id');
 
     /** @var TenantInterface $tenant */
@@ -54,22 +66,42 @@ class MigrateCommand extends Command
         continue;
       }
 
-      $output->writeln("Migrating tenant {$id} ...");
+      $output->writeln("Migrating tenant $id ...");
       $output->writeln("==================================================");
 
       try {
         $this->migrationManager->migrate($tenant);
-      } catch (\Throwable $exception) {
-        $output->writeln("Migration failed for tenant {$id}: " . $exception->getMessage());
+      } catch (Throwable $exception) {
+        $output->writeln("Migration failed for tenant $id: " . $exception->getMessage());
       }
-
-
     }
 
     $output->writeln("Done!");
 
-    return 0;
+    return Command::SUCCESS;
   }
 
+  private function migrateDefaultDatabase(): void
+  {
+    $output = new BufferedOutput();
+    $newInput = new ArrayInput([
+      //'version' => 'latest',
+      '--dry-run' => false,
+      '--all-or-nothing' => true,
+      '--no-interaction' => true,
+      '--em' => 'default',
+      '--configuration' => 'vendor/apajo/symfony-multi-tenancy-bundle/config/migrations/default.yml'
+    ]);
 
+    $newInput->setInteractive(false);
+    $migrateCommand = new DoctrineMigrateCommand($this->dependencyFactory);
+
+    $application = new Application($this->kernel);
+    $application->setAutoExit(false);
+    $exitCode = $application->add($migrateCommand)->run($newInput, $output);
+
+    if ($exitCode !== 0) {
+      throw new RuntimeException('Migration failed');
+    }
+  }
 }

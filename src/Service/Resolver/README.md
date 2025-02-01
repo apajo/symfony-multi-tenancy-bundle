@@ -30,7 +30,6 @@ class TenantManager
 }
 ```
 
-
 ## Built-in resolvers
 
 ### HostBasedResolver

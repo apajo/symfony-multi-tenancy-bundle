@@ -11,7 +11,6 @@ trait TenantAwareTrait
   protected TenantAware $tenantAware;
 
   /**
-   * @param TenantAware $tenantAware
    * @return void
    */
   #[Required]

@@ -14,27 +14,45 @@ class Configuration implements ConfigurationInterface
     $rootNode = $treeBuilder->getRootNode();
 
     $rootNode
-      ->children()
-      ->arrayNode('adapters')
-      ->prototype('scalar')->end()
-      ->end()
-      ->arrayNode('tenant')
-      ->children()
-      ->scalarNode('class')->end()
-      ->scalarNode('identifier')->defaultValue('id')->end()
-      ->scalarNode('entity_manager')->defaultValue('default')->end()
-      ->arrayNode('resolvers')
-      ->scalarPrototype()->end()
-      ->end()
-      ->end()
-      ->end()
-      ->arrayNode('migrations')
-      ->children()
-      ->scalarNode('namespace')->end()
-      ->scalarNode('entity_manager')->defaultValue('tenant')->end()
-      ->end()
-      ->end()
-      ->end();
+            ->children()
+                ->arrayNode('adapters')
+                    ->prototype('scalar')->end()
+                    ->defaultValue([
+                        'aPajo\\MultiTenancyBundle\\Adapter\\Database\\DatabaseAdapter',
+                    ])
+                ->end()
+                ->arrayNode('tenant')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->scalarNode('class')
+                            ->isRequired()
+                        ->end()
+                        ->scalarNode('identifier')
+                            ->defaultValue('key')
+                        ->end()
+                        ->scalarNode('entity_manager')
+                            ->defaultValue('default')
+                        ->end()
+                        ->arrayNode('resolvers')
+                            ->scalarPrototype()->end()
+                            ->defaultValue([
+                                'aPajo\\MultiTenancyBundle\\Service\\Resolver\\HostBasedResolver',
+                            ])
+                        ->end()
+                    ->end()
+                ->end()
+                ->arrayNode('migrations')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->scalarNode('default')
+                            ->defaultValue('%kernel.project_dir%/config/migrations/default.yml')
+                        ->end()
+                        ->scalarNode('tenant')
+                          ->defaultValue('%kernel.project_dir%/config/migrations/tenant.yml')
+                        ->end()
+                    ->end()
+                ->end()
+            ->end();
 
     return $treeBuilder;
   }

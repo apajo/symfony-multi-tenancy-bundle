@@ -3,12 +3,12 @@ services:
     autowire: true
     autoconfigure: true
   
-  aPajo\MultiTenancyBundle\Adapter\:
-    resource: '../../Adapter/*/*Adapter.php'
-
-  aPajo\MultiTenancyBundle\Adapter\Filesystem\FilesystemAdapter:
-    arguments:
-      - '@sonata.media.adapter.filesystem.local' # sonata.media.adapter.filesystem.ftp
+  #   aPajo\MultiTenancyBundle\Adapter\:
+  #     resource: '../../Adapter/*/*Adapter.php'
+  
+  #  aPajo\MultiTenancyBundle\Adapter\Filesystem\FilesystemAdapter:
+  #    arguments:
+  #      - '@sonata.media.adapter.filesystem.local' # sonata.media.adapter.filesystem.ftp
   
   aPajo\MultiTenancyBundle\Adapter\Mailer\MailerAdapter:
     tags:

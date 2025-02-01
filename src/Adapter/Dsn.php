@@ -102,7 +102,7 @@ final class Dsn
     $path = $this->path ? '/' . ltrim($this->path, '/') : '';
 
     $options = '';
-    if (!empty($this->options)) {
+    if ($this->options !== []) {
       $optionsArray = [];
       foreach ($this->options as $key => $value) {
         $optionsArray[] = $key . '=' . rawurlencode((string)$value);
@@ -113,7 +113,7 @@ final class Dsn
     return sprintf(
       '%s://%s%s%s%s%s',
       $this->scheme,
-      $userInfo ? $userInfo . '@' : '',
+      $userInfo !== '' && $userInfo !== '0' ? $userInfo . '@' : '',
       $this->host,
       $port,
       $path,

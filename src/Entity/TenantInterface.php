@@ -1,7 +1,8 @@
 <?php
 
-namespace aPajo\MultiTenancyBundle\Entity;
+namespace App\Entity;
 
-interface TenantInterface
+
+class Tenant
 {
 }

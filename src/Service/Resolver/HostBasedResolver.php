@@ -5,8 +5,10 @@ namespace aPajo\MultiTenancyBundle\Service\Resolver;
 use aPajo\MultiTenancyBundle\Entity\TenantInterface;
 use aPajo\MultiTenancyBundle\Service\TenantConfig;
 use LogicException;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class HostBasedResolver implements TenantResolverInterface
@@ -45,7 +47,6 @@ class HostBasedResolver implements TenantResolverInterface
   /**
    * Get user from token
    * @param bool $exception if true, throws LogicException when tokenstorage has not been set
-   * @return UserInterface|null
    * @throws LogicException When SecurityBundle has not been set and $exception is true
    */
   protected function getUser($exception = true): ?UserInterface
@@ -56,7 +57,7 @@ class HostBasedResolver implements TenantResolverInterface
       return null;
     }
 
-    if (null === $token = $this->tokenstorage->getToken()) {
+    if (!$token = $this->tokenstorage->getToken() instanceof TokenInterface) {
       return null;
     }
 
@@ -77,7 +78,7 @@ class HostBasedResolver implements TenantResolverInterface
   {
     $request = $this->requestStack->getCurrentRequest();
 
-    if (!$request) {
+    if (!$request instanceof Request) {
       return null;
     }
 

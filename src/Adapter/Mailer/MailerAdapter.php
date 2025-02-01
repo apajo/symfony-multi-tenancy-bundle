@@ -10,7 +10,6 @@ use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mailer\Transport\AbstractTransportFactory;
 use Symfony\Component\Mailer\Transport\Dsn as MailerDsn;
 use Symfony\Component\Mailer\Transport\TransportInterface;
-use Throwable;
 
 class MailerAdapter extends AbstractTransportFactory implements PropertyAdapterInterface
 {
@@ -19,10 +18,6 @@ class MailerAdapter extends AbstractTransportFactory implements PropertyAdapterI
   protected string $property = 'mailer';
 
   protected $transport;
-
-  public function __construct()
-  {
-  }
 
   public function create(MailerDsn $dsn): TransportInterface
   {
@@ -39,19 +34,12 @@ class MailerAdapter extends AbstractTransportFactory implements PropertyAdapterI
 
   public function doAdapt(Dsn $dsn)
   {
-    try {
-      $scheme = $dsn->getScheme();
-
-      if (empty($scheme)) {
-        throw new InvalidArgumentException('The mailer DSN must contain a scheme.');
-      }
-
-      $this->transport = Transport::fromDsn((string)$dsn);
-
-      return $this->transport;
-    } catch (Throwable $exception) {
-      throw $exception;
+    $scheme = $dsn->getScheme();
+    if (empty($scheme)) {
+      throw new InvalidArgumentException('The mailer DSN must contain a scheme.');
     }
+    $this->transport = Transport::fromDsn((string)$dsn);
+    return $this->transport;
   }
 
   protected function getSupportedSchemes(): array

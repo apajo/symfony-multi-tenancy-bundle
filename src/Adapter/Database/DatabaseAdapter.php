@@ -7,7 +7,9 @@ use aPajo\MultiTenancyBundle\Adapter\PropertyAdapterInterface;
 use aPajo\MultiTenancyBundle\Adapter\PropertyAdapterTrait;
 use aPajo\MultiTenancyBundle\Service\TenantConfig;
 use Doctrine\Bundle\DoctrineBundle\Registry;
+use Doctrine\ORM\EntityManager;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Doctrine\DBAL\Connection;
 
 class DatabaseAdapter implements PropertyAdapterInterface
 {
@@ -17,6 +19,7 @@ class DatabaseAdapter implements PropertyAdapterInterface
 
   public function doAdapt(Dsn $dsn)
   {
+    /** @var Connection $connection */
     $connection = $this->doctrine->getConnection('tenant');
 
     // Get new connection parameters

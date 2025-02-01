@@ -28,8 +28,6 @@ class EnvironmentProvider
 
   /**
    * @param TenantInterface[]|Collection $tenants
-   * @param callable $callback
-   * @return void
    */
   public function forEach(Collection $tenants, callable $callback): void
   {
@@ -40,7 +38,6 @@ class EnvironmentProvider
 
   /**
    * @param $callback
-   * @return void
    */
   public function forAll($callback): void
   {
@@ -102,7 +99,7 @@ class EnvironmentProvider
     $tenant = $event->getTenant();
 
     // TODO: implement null-tenant handling
-    if (!$tenant) {
+    if (!$tenant instanceof TenantInterface) {
       return;
     }
 

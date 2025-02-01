@@ -4,7 +4,6 @@ namespace aPajo\MultiTenancyBundle\DependencyInjection;
 
 use aPajo\MultiTenancyBundle\APajoMultiTenancyBundle;
 use aPajo\MultiTenancyBundle\Migration\Command\DiffCommand;
-use aPajo\MultiTenancyBundle\Migration\Command\MigrateCommand;
 use aPajo\MultiTenancyBundle\Migration\MigrationManager;
 use aPajo\MultiTenancyBundle\Service\Registry\AdapterRegistry;
 use aPajo\MultiTenancyBundle\Service\Registry\ResolverRegistry;
@@ -80,7 +79,7 @@ class Extension extends Base
     // Config service
     if ($container->hasDefinition(TenantConfig::class)) {
       $definition = $container->getDefinition(TenantConfig::class);
-      $entityManagerServiceId = strpos($cfg['tenant']['entity_manager'], '.') === false ?
+      $entityManagerServiceId = !str_contains($cfg['tenant']['entity_manager'], '.') ?
         sprintf('doctrine.orm.%s_entity_manager', $cfg['tenant']['entity_manager']) :
         $cfg['tenant']['entity_manager'];
 
