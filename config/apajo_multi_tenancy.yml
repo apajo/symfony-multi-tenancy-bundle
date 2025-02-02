@@ -5,7 +5,7 @@ apajo_multi_tenancy:
     - aPajo\MultiTenancyBundle\Adapter\Mailer\MailerAdapter
   
   tenant:                                   # Tenant (entity) configuration
-    class: Core\TenantBundle\Entity\Tenant  # Must implement TenantInterface
+    class: App\Entity\Tenant                # Must implement TenantInterface
     identifier: key                         # Identifier column name (must be unique field)
     entity_manager: default                 # Tenant entity manager name
     resolvers:                              # Resolvers resolve the tenant based on the request

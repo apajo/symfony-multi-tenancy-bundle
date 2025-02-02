@@ -41,12 +41,12 @@ class MigrationManager
     );
   }
 
-  public function migrate(TenantInterface $tenant): bool
+  public function migrate(TenantInterface $tenant, string $version = null): bool
   {
     $this->environmentProvider->for($tenant, function (TenantInterface $tenant, EntityManagerInterface $em) {
       $output = new BufferedOutput();
       $newInput = new ArrayInput([
-        //'version' => 'latest',
+        'version' => $version ?: 'latest',
         '--dry-run' => true,
         '--all-or-nothing' => true,
         '--no-interaction' => true,

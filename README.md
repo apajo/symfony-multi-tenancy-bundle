@@ -111,16 +111,7 @@ In this case thay are named `default` and `tenant` but you can name them as you 
 Connection and entity manager `default` are common for all the individual tenants.
 Connection and entity manager `tenant` are specific for the tenant.
 
-### doctrine_migrations.yml
-
-```yaml
-doctrine_migrations:
-  migrations_paths:
-    'App\Migrations\Default': '%kernel.project_dir%/migrations/default'
-    'App\Migrations\Tenant': '%kernel.project_dir%/migrations/tenant'
-```
-
-## Configuration
+## apajo_multi_tenancy.yml
 
 ```yaml
 apajo_multi_tenancy:
@@ -136,9 +127,38 @@ apajo_multi_tenancy:
     resolvers:                              # Resolvers resolve the tenant based on the request
       - aPajo\MultiTenancyBundle\Service\Resolver\HostBasedResolver 
       
-  migrations: # Migration configuration
-    namespace: App\Migrations\Tenant
-    entity_manager: tenant
+  migrations: # Tenant Migration configuration
+    default: '%kernel.project_dir%/config/migrations/default.yml'
+    tenant: '%kernel.project_dir%/config/migrations/tenant.yml'
+
+```
+
+### Doctrine migrations configuration
+
+Recommended path for the configuration files is `config/migrations/`.
+
+
+#### default.yml
+
+```yaml
+migrations_paths:
+  'App\Migrations\Default': 'migrations/default'
+```
+
+#### tenant.yml
+
+```yaml
+migrations_paths:
+  'App\Migrations\Tenant': 'migrations/tenant'
+```
+
+#### doctrine_migrations.yml
+
+```yaml
+doctrine_migrations:
+  migrations_paths:
+    'App\Migrations\Default': '%kernel.project_dir%/migrations/default'
+    'App\Migrations\Tenant': '%kernel.project_dir%/migrations/tenant'
 ```
 
 ## Adapters
@@ -155,24 +175,22 @@ For more on (built-in) resolvers see [Resolvers directory](./src/Service/Resolve
 
 ## Database migrations
 
-### Create migration (or diff)
+This bundle adds just 2 new commands to your project:
 
 ```shell
+# Create new migrations/diffs (for default and tenant connections)
+
 php bin/console tenants:migrations:diff
 ```
 
-### Migrate tenants
-
 ```shell
-php bin/console tenants:migrations:migrate
+# Apply migrations to the tenants (or a single tenant) and the default connection
+
+php bin/console tenants:migrations:migrate [tenant_id]
 ```
 
-### Migrate a single tenant
 
-```shell
-# TODO: Implement
-# php bin/console tenants:migrations:migrate [tenant_id]
-```
+__NB!__ All other migration commands are as-is by [DoctrineMigrationsBundle](https://symfony.com/bundles/DoctrineMigrationsBundle/current/index.html) 
 
 ## Examples
 
@@ -188,7 +206,7 @@ class Tenant implements TenantInterface {
     // ...
 }
 
-class MyTenantService {
+class MyTenantSelectService {
   public function __construct (
     private EnvironmentProvider $environmentProvider,
     private EventDispatcherInterface $dispatcher,
@@ -253,6 +271,7 @@ Feel free to report an issue [under GitHub Issues](https://github.com/apajo/symf
 ### Known Issues
 
 * Resetting to default/initial tenant does not work
+* Symfony profiler currently shows only default entity managers migrations
 
 ## Contributing
 

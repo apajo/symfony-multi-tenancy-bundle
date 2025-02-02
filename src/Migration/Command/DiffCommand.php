@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Input\InputArgument;
 
 
 /**
@@ -40,7 +41,10 @@ class DiffCommand extends AbstractCommand
     $this
       ->setName(self::$defaultName)
       ->setDescription('Proxy for doctrine:migrations:diff command')
-      ->setHelp('This command allows you to proxy the doctrine:migrations:diff command');
+      ->setHelp('This command allows you to proxy the doctrine:migrations:diff command')
+      ->addArgument('version', InputArgument::OPTIONAL, 'The version number (YYYYMMDDHHMMSS) or alias (first, prev, next, latest) to migrate to.', 'latest')
+      ;
+      
   }
 
 

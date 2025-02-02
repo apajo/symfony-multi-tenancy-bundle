@@ -10,7 +10,6 @@ use Doctrine\Migrations\DependencyFactory;
 use Doctrine\Migrations\Tools\Console\Command\MigrateCommand as DoctrineMigrateCommand;
 use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -19,13 +18,14 @@ use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Throwable;
+use Symfony\Component\Console\Command\Command;
 
 /**
  * Command for migrating (all) tenant databases
  *
  * @author Andres Pajo <andres@apajo.ee>
  */
-class MigrateCommand extends Command
+class MigrateCommand extends AbstractCommand
 {
   protected array $config;
 
@@ -38,6 +38,11 @@ class MigrateCommand extends Command
   )
   {
     parent::__construct();
+  }
+
+  public function setMigrationConfig(array $config): void
+  {
+    $this->config = $config;
   }
 
   protected function configure(): void
@@ -54,9 +59,10 @@ class MigrateCommand extends Command
 
   protected function execute(InputInterface $input, OutputInterface $output): int
   {
-    $this->migrateDefaultDatabase();
-
     $tenantKey = $input->getArgument('tenant_id');
+    $version = $input->getArgument('version');
+
+    $this->migrateDefaultDatabase($version);
 
     /** @var TenantInterface $tenant */
     foreach ($this->tenantManager->findAll() as $tenant) {
@@ -70,7 +76,7 @@ class MigrateCommand extends Command
       $output->writeln("==================================================");
 
       try {
-        $this->migrationManager->migrate($tenant);
+        $this->migrationManager->migrate($tenant, $version);
       } catch (Throwable $exception) {
         $output->writeln("Migration failed for tenant $id: " . $exception->getMessage());
       }
@@ -81,11 +87,11 @@ class MigrateCommand extends Command
     return Command::SUCCESS;
   }
 
-  private function migrateDefaultDatabase(): void
+  protected function migrateDefaultDatabase(string $version = null): void
   {
     $output = new BufferedOutput();
     $newInput = new ArrayInput([
-      //'version' => 'latest',
+      'version' => $version ?: 'latest',
       '--dry-run' => false,
       '--all-or-nothing' => true,
       '--no-interaction' => true,
