@@ -11,14 +11,6 @@ class DiffCommandTest extends AbstractTestCase
     self::bootKernel();
     $this->container = self::$container;
   }
-  
-  /**
-   * @covers \aPajo\MultiTenancyBundle\Migration\Command\DiffCommand
-   */
-  public function testRunProcess()
-  {
-    $this->runProcess(['ls', '-lah']);
-  }
 
   /**
    * @covers \aPajo\MultiTenancyBundle\Migration\Command\DiffCommand

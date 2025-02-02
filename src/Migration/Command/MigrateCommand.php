@@ -96,7 +96,7 @@ class MigrateCommand extends AbstractCommand
       '--all-or-nothing' => true,
       '--no-interaction' => true,
       '--em' => 'default',
-      '--configuration' => 'vendor/apajo/symfony-multi-tenancy-bundle/config/migrations/default.yml'
+      '--configuration' => $this->config['default'],
     ]);
 
     $newInput->setInteractive(false);

@@ -51,9 +51,7 @@ class MigrationManager
         '--all-or-nothing' => true,
         '--no-interaction' => true,
         '--em' => 'tenant',
-        '--configuration' => 'vendor/apajo/symfony-multi-tenancy-bundle/config/migrations/tenant.yml'
-//        '--query-time' => $input->getOption('query-time'),
-//        '--allow-no-migration' => $input->getOption('allow-no-migration'),
+        '--configuration' => $this->config['default'],
       ]);
 
       $newInput->setInteractive(false);

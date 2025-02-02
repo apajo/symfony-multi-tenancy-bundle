@@ -128,8 +128,8 @@ apajo_multi_tenancy:
       - aPajo\MultiTenancyBundle\Service\Resolver\HostBasedResolver 
       
   migrations: # Tenant Migration configurations
-    default: '%kernel.project_dir%/config/migrations/default.yml'
-    tenant: '%kernel.project_dir%/config/migrations/tenant.yml'
+    default: 'config/migrations/default.yml'
+    tenant: 'config/migrations/tenant.yml'
 ```
 
 ### Doctrine migrations configuration
@@ -149,15 +149,6 @@ migrations_paths:
 ```yaml
 migrations_paths:
   'App\Migrations\Tenant': 'migrations/tenant'
-```
-
-#### doctrine_migrations.yml
-
-```yaml
-doctrine_migrations:
-  migrations_paths:
-    'App\Migrations\Default': '%kernel.project_dir%/migrations/default'
-    'App\Migrations\Tenant': '%kernel.project_dir%/migrations/tenant'
 ```
 
 ## Adapters
