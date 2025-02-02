@@ -1,0 +1,12 @@
+when@test:
+  doctrine:
+    orm:
+      entity_managers:
+        default:
+          mappings:
+            App:
+              is_bundle: false
+              type: attribute
+              dir: '%kernel.project_dir%/tests/Entity'
+              prefix: 'App\Entity'
+              alias: App

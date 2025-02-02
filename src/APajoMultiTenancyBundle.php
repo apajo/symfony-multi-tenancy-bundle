@@ -10,7 +10,7 @@ use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 
 class APajoMultiTenancyBundle extends AbstractBundle
 {
-  public function build(ContainerBuilder $container)
+  public function build(ContainerBuilder $container): void
   {
     parent::build($container);
 

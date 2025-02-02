@@ -1,0 +1,29 @@
+doctrine:
+  dbal:
+    default_connection: default
+    connections:
+      default:
+        url: '%env(DEFAULT_DATABASE_URL)%'
+        driver: pdo_mysql
+        charset: utf8
+        server_version: '8'
+
+      tenant:
+        url: '%env(TENANT_DATABASE_URL)%'
+        driver:   pdo_mysql
+        charset:  utf8
+        server_version: '8'
+
+  orm:
+    default_entity_manager: default
+    auto_generate_proxy_classes: true
+    
+    entity_managers:
+      default:
+        connection: default
+        naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+
+      tenant:
+        connection: tenant
+        naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+        mappings:

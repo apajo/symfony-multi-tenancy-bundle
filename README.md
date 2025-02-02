@@ -127,10 +127,9 @@ apajo_multi_tenancy:
     resolvers:                              # Resolvers resolve the tenant based on the request
       - aPajo\MultiTenancyBundle\Service\Resolver\HostBasedResolver 
       
-  migrations: # Tenant Migration configuration
+  migrations: # Tenant Migration configurations
     default: '%kernel.project_dir%/config/migrations/default.yml'
     tenant: '%kernel.project_dir%/config/migrations/tenant.yml'
-
 ```
 
 ### Doctrine migrations configuration
@@ -279,7 +278,7 @@ Feel free to [contribute](https://github.com/apajo/symfony-multi-tenancy-bundle/
 
 ### Versioning
 
-Bundles must be versioned following the [Semantic Versioning Specification](https://semver.org/).
+Versions must be numbered following the [Semantic Versioning Specification](https://semver.org/).
 
 ### Thanks to
 
