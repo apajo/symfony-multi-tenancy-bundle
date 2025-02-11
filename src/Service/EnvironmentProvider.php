@@ -31,7 +31,7 @@ class EnvironmentProvider
    */
   public function forEach(Collection $tenants, callable $callback): void
   {
-    $tenants->forAll(function (int $index, TenantInterface $tenant) use ($callback) {
+    $tenants->forAll(function (int $index, TenantInterface $tenant) use ($callback): void {
       $this->for($tenant, $callback);
     });
   }
@@ -39,7 +39,7 @@ class EnvironmentProvider
   /**
    * @param $callback
    */
-  public function forAll($callback): void
+  public function forAll(callable $callback): void
   {
     $tenants = $this->findAll();
     $this->forEach($tenants, $callback);
@@ -55,7 +55,7 @@ class EnvironmentProvider
     return $this->tenantConfig->getRepository();
   }
 
-  public function for(TenantInterface $tenant, $callback)
+  public function for(TenantInterface $tenant, $callback): void
   {
     $this->select($tenant);
 
@@ -67,26 +67,26 @@ class EnvironmentProvider
     $this->reset();
   }
 
-  public function select(?TenantInterface $tenant = null)
+  public function select(?TenantInterface $tenant = null): void
   {
     $event = new TenantSelectEvent($tenant);
     $this->dispatcher->dispatch($event);
   }
 
-  public function reset()
+  public function reset(): void
   {
     $event = new TenantSelectEvent(null);
     $this->dispatcher->dispatch($event);
   }
 
-  public function selectTenantById(?int $tenantId = null)
+  public function selectTenantById(?int $tenantId = null): void
   {
     $tenant = $this->getRepo()->find($tenantId);
     $event = new TenantSelectEvent($tenant);
     $this->dispatcher->dispatch($event);
   }
 
-  public function init()
+  public function init(): void
   {
     $tenant = $this->tenantManager->resolve();
 
@@ -94,7 +94,7 @@ class EnvironmentProvider
     $this->dispatcher->dispatch($event);
   }
 
-  public function onTenantSelectEvent(TenantSelectEvent $event)
+  public function onTenantSelectEvent(TenantSelectEvent $event): void
   {
     $tenant = $event->getTenant();
 
@@ -103,7 +103,7 @@ class EnvironmentProvider
       return;
     }
 
-    $this->adapterRegistry->getAdapters()->map(function (AdapterInterface $adapter) use ($tenant) {
+    $this->adapterRegistry->getAdapters()->map(function (AdapterInterface $adapter) use ($tenant): void {
       $adapter->adapt($tenant);
     });
   }

@@ -30,10 +30,10 @@ class MigrateCommand extends AbstractCommand
   protected array $config;
 
   public function __construct(
-    private MigrationManager    $migrationManager,
-    private TenantManager       $tenantManager,
-    private TenantConfig        $tenantConfig,
-    private KernelInterface     $kernel,
+    private readonly MigrationManager    $migrationManager,
+    private readonly TenantManager       $tenantManager,
+    private readonly TenantConfig        $tenantConfig,
+    private readonly KernelInterface     $kernel,
     protected DependencyFactory $dependencyFactory,
   )
   {

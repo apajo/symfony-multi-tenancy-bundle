@@ -16,7 +16,7 @@ class DatabaseAdapter implements PropertyAdapterInterface
 
   protected string $property = 'database';
 
-  public function doAdapt(Dsn $dsn)
+  public function doAdapt(Dsn $dsn): void
   {
     /** @var Connection $connection */
     $connection = $this->doctrine->getConnection('tenant');
@@ -42,7 +42,7 @@ class DatabaseAdapter implements PropertyAdapterInterface
   private function getConnectionParams(Dsn $dsn): array
   {
     return [
-      'dbname' => trim($dsn->getPath(), '/'),
+      'dbname' => trim((string) $dsn->getPath(), '/'),
       'user' => $dsn->getUser(),
       'password' => $dsn->getPassword(),
       'host' => $dsn->getHost(),

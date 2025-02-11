@@ -24,7 +24,7 @@ class TenantAware
   {
   }
 
-  public function onTenantSelectEvent(TenantSelectEvent $event)
+  public function onTenantSelectEvent(TenantSelectEvent $event): void
   {
     $tenant = $event->getTenant();
     $this->tenant = $tenant;
