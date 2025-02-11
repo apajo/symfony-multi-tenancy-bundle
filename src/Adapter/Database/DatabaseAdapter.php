@@ -7,9 +7,8 @@ use aPajo\MultiTenancyBundle\Adapter\PropertyAdapterInterface;
 use aPajo\MultiTenancyBundle\Adapter\PropertyAdapterTrait;
 use aPajo\MultiTenancyBundle\Service\TenantConfig;
 use Doctrine\Bundle\DoctrineBundle\Registry;
-use Doctrine\ORM\EntityManager;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Doctrine\DBAL\Connection;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class DatabaseAdapter implements PropertyAdapterInterface
 {
