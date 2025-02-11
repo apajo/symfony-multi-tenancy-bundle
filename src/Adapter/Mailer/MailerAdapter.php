@@ -35,7 +35,7 @@ class MailerAdapter extends AbstractTransportFactory implements PropertyAdapterI
   public function doAdapt(Dsn $dsn)
   {
     $scheme = $dsn->getScheme();
-    if (empty($scheme)) {
+    if ($scheme === '' || $scheme === '0') {
       throw new InvalidArgumentException('The mailer DSN must contain a scheme.');
     }
     $this->transport = Transport::fromDsn((string)$dsn);

@@ -10,12 +10,12 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 class RequestListener
 {
   public function __construct(
-    private EnvironmentProvider $environmentProvider,
+    private readonly EnvironmentProvider $environmentProvider,
   )
   {
   }
 
-  public function onKernelRequest(RequestEvent $event)
+  public function onKernelRequest(RequestEvent $event): void
   {
     $this->environmentProvider->init();
   }

@@ -27,7 +27,7 @@ class Extension extends Base
   /**
    * {@inheritdoc}
    */
-  public function load(array $configs, ContainerBuilder $container)
+  public function load(array $configs, ContainerBuilder $container): void
   {
     $this->loadConfig($configs, $container, 'services.yml');
 
@@ -88,9 +88,9 @@ class Extension extends Base
     // Config service
     if ($container->hasDefinition(TenantConfig::class)) {
       $definition = $container->getDefinition(TenantConfig::class);
-      $entityManagerServiceId = !str_contains($cfg['tenant']['entity_manager'], '.') ?
-        sprintf('doctrine.orm.%s_entity_manager', $cfg['tenant']['entity_manager']) :
-        $cfg['tenant']['entity_manager'];
+      $entityManagerServiceId = str_contains((string) $cfg['tenant']['entity_manager'], '.') ?
+        $cfg['tenant']['entity_manager'] :
+        sprintf('doctrine.orm.%s_entity_manager', $cfg['tenant']['entity_manager']);
 
       $emReference = new Reference($entityManagerServiceId);
 
@@ -106,7 +106,7 @@ class Extension extends Base
     $loader->load($name);
   }
 
-  public function getContainerExtension()
+  public function getContainerExtension(): string
   {
     return 'apajo_multi_tenancy';
   }
