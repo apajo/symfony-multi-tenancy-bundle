@@ -132,6 +132,30 @@ apajo_multi_tenancy:
     tenant: 'config/migrations/tenant.yml'
 ```
 
+## services.yml
+
+Every adapter you use must be registered as a service.
+Example of the built-in ones:
+
+```yaml
+services:
+  # ...
+
+  aPajo\MultiTenancyBundle\Adapter\Filesystem\FilesystemAdapter:
+    arguments:
+      - '@sonata.media.adapter.filesystem.local' # sonata.media.adapter.filesystem.ftp
+  
+  aPajo\MultiTenancyBundle\Adapter\Mailer\MailerAdapter:
+    tags:
+      - { name: mailer.transport_factory }
+  
+  aPajo\MultiTenancyBundle\Adapter\Database\DatabaseAdapter:
+    arguments:
+      $doctrine: '@doctrine'
+      
+  # ...
+```
+
 ### Doctrine migrations configuration
 
 Recommended path for the configuration files is `config/migrations/`.
