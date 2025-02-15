@@ -3,17 +3,17 @@ services:
     autowire: true
     autoconfigure: true
   
-  #   aPajo\MultiTenancyBundle\Adapter\:
-  #     resource: '../../Adapter/*/*Adapter.php'
+#  aPajo\MultiTenancyBundle\Adapter\:
+#    resource: '../../Adapter/*/*Adapter.php'
   
-  #  aPajo\MultiTenancyBundle\Adapter\Filesystem\FilesystemAdapter:
-  #    arguments:
-  #      - '@sonata.media.adapter.filesystem.local' # sonata.media.adapter.filesystem.ftp
-  
-  aPajo\MultiTenancyBundle\Adapter\Mailer\MailerAdapter:
-    tags:
-      - { name: mailer.transport_factory }
-
-  aPajo\MultiTenancyBundle\Adapter\Database\DatabaseAdapter:
-    arguments:
-      $doctrine: '@doctrine'
+#  aPajo\MultiTenancyBundle\Adapter\Filesystem\FilesystemAdapter:
+#    arguments:
+#      - '@sonata.media.adapter.filesystem.local' # sonata.media.adapter.filesystem.ftp
+#  
+#  aPajo\MultiTenancyBundle\Adapter\Mailer\MailerAdapter:
+#    tags:
+#      - { name: mailer.transport_factory }
+#
+#  aPajo\MultiTenancyBundle\Adapter\Database\DatabaseAdapter:
+#    arguments:
+#      $doctrine: '@doctrine'
