@@ -20,10 +20,10 @@ class MigrationManager
 
 
   public function __construct(
-    private KernelInterface     $kernel,
+    private readonly KernelInterface     $kernel,
     protected DependencyFactory $dependencyFactory,
-    private EnvironmentProvider $environmentProvider,
-    private TenantConfig        $tenantConfig,
+    private readonly EnvironmentProvider $environmentProvider,
+    private readonly TenantConfig        $tenantConfig,
   )
   {
   }
@@ -43,7 +43,7 @@ class MigrationManager
 
   public function migrate(TenantInterface $tenant, string $version = null): bool
   {
-    $this->environmentProvider->for($tenant, function (TenantInterface $tenant, EntityManagerInterface $em) {
+    $this->environmentProvider->for($tenant, function (TenantInterface $tenant, EntityManagerInterface $em): void {
       $output = new BufferedOutput();
       $newInput = new ArrayInput([
         'version' => $version ?: 'latest',

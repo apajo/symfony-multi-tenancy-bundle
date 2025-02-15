@@ -10,6 +10,7 @@ use Doctrine\Migrations\DependencyFactory;
 use Doctrine\Migrations\Tools\Console\Command\MigrateCommand as DoctrineMigrateCommand;
 use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -18,7 +19,6 @@ use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Throwable;
-use Symfony\Component\Console\Command\Command;
 
 /**
  * Command for migrating (all) tenant databases
@@ -30,10 +30,10 @@ class MigrateCommand extends AbstractCommand
   protected array $config;
 
   public function __construct(
-    private MigrationManager    $migrationManager,
-    private TenantManager       $tenantManager,
-    private TenantConfig        $tenantConfig,
-    private KernelInterface     $kernel,
+    private readonly MigrationManager    $migrationManager,
+    private readonly TenantManager       $tenantManager,
+    private readonly TenantConfig        $tenantConfig,
+    private readonly KernelInterface     $kernel,
     protected DependencyFactory $dependencyFactory,
   )
   {

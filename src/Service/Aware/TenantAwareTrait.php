@@ -10,11 +10,8 @@ trait TenantAwareTrait
 {
   protected TenantAware $tenantAware;
 
-  /**
-   * @return void
-   */
   #[Required]
-  public function setTenantAware(TenantAware $tenantAware)
+  public function setTenantAware(TenantAware $tenantAware): void
   {
     $this->tenantAware = $tenantAware;
   }

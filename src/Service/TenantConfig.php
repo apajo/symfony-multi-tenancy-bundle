@@ -11,7 +11,7 @@ class TenantConfig
 {
   function __construct(
     private array                  $config,
-    private EntityManagerInterface $em,
+    private readonly EntityManagerInterface $em,
   )
   {
   }
