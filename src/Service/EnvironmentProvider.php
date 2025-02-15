@@ -31,8 +31,12 @@ class EnvironmentProvider
    */
   public function forEach(Collection $tenants, callable $callback): void
   {
-    $tenants->forAll(function (int $index, TenantInterface $tenant) use ($callback) {
-      $this->for($tenant, $callback);
+    $tenants->map(function (TenantInterface $tenant) use ($callback) {
+      try {
+        $this->for($tenant, $callback);
+      } catch (\Throwable $e) {
+        //throw $e;
+      }
     });
   }
 

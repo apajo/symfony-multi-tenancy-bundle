@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Entity;
+namespace aPajo\MultiTenancyBundle\Entity;
 
 
-class Tenant
+interface TenantInterface
 {
+  public function getId(): int;
 }
