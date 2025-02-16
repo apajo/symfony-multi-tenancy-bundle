@@ -57,7 +57,7 @@ class HostBasedResolver implements TenantResolverInterface
       return null;
     }
 
-    if (!$token = $this->tokenstorage->getToken() instanceof TokenInterface) {
+    if (!$token = $this->tokenstorage->getToken()) {
       return null;
     }
 
