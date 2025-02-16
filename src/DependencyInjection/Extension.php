@@ -3,9 +3,6 @@
 namespace aPajo\MultiTenancyBundle\DependencyInjection;
 
 use aPajo\MultiTenancyBundle\APajoMultiTenancyBundle;
-use aPajo\MultiTenancyBundle\Migration\Command\DiffCommand;
-use aPajo\MultiTenancyBundle\Migration\Command\MigrateCommand;
-use aPajo\MultiTenancyBundle\Migration\MigrationManager;
 use aPajo\MultiTenancyBundle\Service\EnvironmentProvider;
 use aPajo\MultiTenancyBundle\Service\Registry\AdapterRegistry;
 use aPajo\MultiTenancyBundle\Service\Registry\ResolverRegistry;
@@ -39,31 +36,6 @@ class Extension extends Base
 
     if (!isset($bundles['DoctrineBundle'])) {
       throw new InvalidConfigurationException('DoctrineBundle is required by ' . APajoMultiTenancyBundle::class);
-    }
-
-    // Migration command configuration
-    if ($container->hasDefinition(DiffCommand::class)) {
-      $definition = $container->getDefinition(DiffCommand::class);
-      $definition->addMethodCall(
-        'setMigrationConfig',
-        [$cfg['migrations']]
-      );
-    }
-
-    if ($container->hasDefinition(MigrateCommand::class)) {
-      $definition = $container->getDefinition(MigrateCommand::class);
-      $definition->addMethodCall(
-        'setMigrationConfig',
-        [$cfg['migrations']]
-      );
-    }
-
-    if ($container->hasDefinition(MigrationManager::class)) {
-      $definition = $container->getDefinition(MigrationManager::class);
-      $definition->addMethodCall(
-        'setMigrationConfig',
-        [$cfg['migrations']]
-      );
     }
 
     // Adapter registry

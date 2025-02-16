@@ -11,6 +11,6 @@ apajo_multi_tenancy:
     resolvers:                              # Resolvers resolve the tenant based on the request
       - aPajo\MultiTenancyBundle\Service\Resolver\HostBasedResolver 
       
-  migrations: # Tenant Migration configurations
-    default: '%kernel.project_dir%/config/migrations/default.yml'
-    tenant: '%kernel.project_dir%/config/migrations/tenant.yml'
+  migrations: # Tenant Migration configurations (relative to project root)
+    default: 'config/migrations/default.yml'
+    tenant: 'config/migrations/tenant.yml'
