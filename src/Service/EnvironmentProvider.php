@@ -133,6 +133,6 @@ class EnvironmentProvider
 
     $level = $level ?: Logger::ALERT;
 
-    $this->logger->log($level, 'TenantBundle: ' . $message);
+    $this->logger->log($level, $message, ['channel' => 'tenant']);
   }
 }
