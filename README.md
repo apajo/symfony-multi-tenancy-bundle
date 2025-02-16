@@ -295,6 +295,10 @@ Feel free to [contribute](https://github.com/apajo/symfony-multi-tenancy-bundle/
 
 Versions must be numbered following the [Semantic Versioning Specification](https://semver.org/).
 
+### Packagist
+
+Packagist [link](https://packagist.org/packages/apajo/symfony-multi-tenancy-bundle)
+
 ### Thanks to
 
 This bundle is inspired by the [RamyHakam / multi_tenancy_bundle](https://github.com/RamyHakam/multi_tenancy_bundle)
