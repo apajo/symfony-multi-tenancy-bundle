@@ -12,10 +12,13 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface as SymfonyEventDispatcherInterface;
+use Monolog\Logger;
 
 #[AsEventListener(event: TenantSelectEvent::class, method: 'onTenantSelectEvent')]
 class EnvironmentProvider
 {
+  protected ?Logger $logger;
+
   public function __construct(
     protected SymfonyEventDispatcherInterface $dispatcher,
     protected TenantAware                     $tenantAware,
@@ -38,6 +41,11 @@ class EnvironmentProvider
         //throw $e;
       }
     });
+  }
+
+  public function setLogger(Logger $logger): void
+  {
+    $this->logger = $logger;
   }
 
   /**
@@ -107,8 +115,24 @@ class EnvironmentProvider
       return;
     }
 
+    $this->log('Selecting tenant: ' . $tenant?->getId(), Logger::DEBUG);
     $this->adapterRegistry->getAdapters()->map(function (AdapterInterface $adapter) use ($tenant) {
+      $this->log('Applying adapter: ' . $adapter::class, Logger::DEBUG);
+
       $adapter->adapt($tenant);
     });
+
+    $this->log('Selected tenant: ' . $tenant?->getId());
+  }
+
+  protected function log(string $message, $level = null): void
+  {
+    if (!$this->logger) {
+      return;
+    }
+
+    $level = $level ?: Logger::ALERT;
+
+    $this->logger->log($level, 'TenantBundle: ' . $message);
   }
 }

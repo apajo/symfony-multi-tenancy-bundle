@@ -6,6 +6,7 @@ use aPajo\MultiTenancyBundle\APajoMultiTenancyBundle;
 use aPajo\MultiTenancyBundle\Migration\Command\DiffCommand;
 use aPajo\MultiTenancyBundle\Migration\Command\MigrateCommand;
 use aPajo\MultiTenancyBundle\Migration\MigrationManager;
+use aPajo\MultiTenancyBundle\Service\EnvironmentProvider;
 use aPajo\MultiTenancyBundle\Service\Registry\AdapterRegistry;
 use aPajo\MultiTenancyBundle\Service\Registry\ResolverRegistry;
 use aPajo\MultiTenancyBundle\Service\TenantConfig;
@@ -96,6 +97,15 @@ class Extension extends Base
 
       $definition->setArgument(0, $cfg);
       $definition->setArgument(1, $emReference);
+    }
+
+    // Set monolog er logger if exists
+    if (isset($bundles['MonologBundle'])) {
+      $definition = $container->getDefinition(EnvironmentProvider::class);
+      $definition->addMethodCall(
+        'setLogger',
+        [new Reference('monolog.logger')]
+      );
     }
   }
 
