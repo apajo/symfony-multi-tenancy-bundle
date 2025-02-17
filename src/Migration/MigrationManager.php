@@ -43,7 +43,7 @@ class MigrationManager
 
   public function migrate(TenantInterface $tenant, string $version = null): bool
   {
-    $this->environmentProvider->for($tenant, function (TenantInterface $tenant, EntityManagerInterface $em): void {
+    $this->environmentProvider->for($tenant, function (TenantInterface $tenant, EntityManagerInterface $em) use ($version): void {
       $output = new BufferedOutput();
       $newInput = new ArrayInput([
         'version' => $version ?: 'latest',
