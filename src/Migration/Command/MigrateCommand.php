@@ -27,7 +27,10 @@ use Throwable;
  */
 class MigrateCommand extends AbstractCommand
 {
+  const NAME = 'tenants:migrations:migrate';
+
   protected array $config;
+  protected OutputInterface $output;
 
   public function __construct(
     private readonly MigrationManager    $migrationManager,
@@ -48,38 +51,28 @@ class MigrateCommand extends AbstractCommand
   protected function configure(): void
   {
     $this
-      ->setName('tenants:migrations:migrate')
+      ->setName(MigrateCommand::NAME)
       ->setDescription('Proxy to launch doctrine:migrations:migrate for (all) tenant databases .')
-      ->addArgument('tenant_id', InputArgument::OPTIONAL, 'Tenant key/dentifier')
+      ->addArgument('tenant', InputArgument::OPTIONAL, 'Tenant key/dentifier')
       ->addArgument('version', InputArgument::OPTIONAL, 'The version number (YYYYMMDDHHMMSS) or alias (first, prev, next, latest) to migrate to.', 'latest')
-      ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Execute the migration as a dry run.')
-      ->addOption('query-time', null, InputOption::VALUE_NONE, 'Time all the queries individually.')
-      ->addOption('allow-no-migration', null, InputOption::VALUE_NONE, 'Do not throw an exception when no changes are detected.');
+      ->addOption('em', null, InputOption::VALUE_OPTIONAL, 'Entity-manager name', 'tenant');
+    ;
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int
   {
-    $tenantKey = $input->getArgument('tenant_id');
+    $tenantKey = $input->getArgument('tenant');
     $version = $input->getArgument('version');
+    $em = $input->getOption('em');
 
-    $this->migrateDefaultDatabase($version);
+    $this->output = $output;
 
-    /** @var TenantInterface $tenant */
-    foreach ($this->tenantManager->findAll() as $tenant) {
-      $id = $this->tenantConfig->getTenantIdentifier($tenant);
-
-      if ($tenantKey !== $id && $tenantKey !== null) {
-        continue;
-      }
-
-      $output->writeln("Migrating tenant $id ...");
-      $output->writeln("==================================================");
-
-      try {
-        $this->migrationManager->migrate($tenant, $version);
-      } catch (Throwable $exception) {
-        $output->writeln("Migration failed for tenant $id: " . $exception->getMessage());
-      }
+    if ($em === 'default') {
+      $this->migrateDefaultDatabase($version);
+    } elseif ($tenantKey) {
+      $this->migrate($tenantKey, $version);
+    } else {
+      $this->migrateAll();
     }
 
     $output->writeln("Done!");
@@ -87,14 +80,46 @@ class MigrateCommand extends AbstractCommand
     return Command::SUCCESS;
   }
 
+  protected function migrate(string $tenantKey, string $version = null): void
+  {
+    $this->output->writeln("Migrating tenant $tenantKey ...");
+    $this->output->writeln("==================================================");
+
+    try {
+      $this->migrationManager->migrateByKey($tenantKey, $version);
+    } catch (Throwable $exception) {
+      $this->output->writeln("Migration failed for tenant $tenantKey: " . $exception->getMessage());
+    }
+  }
+
+  protected function migrateAll(string $version = null): void
+  {
+    $this->runProcess($this->output, [
+      'php', 'bin/console', MigrateCommand::NAME, '--em=default'
+    ]);
+
+    /** @var TenantInterface $tenant */
+    foreach ($this->tenantManager->findAll() as $tenant) {
+      $key = $this->tenantConfig->getTenantIdentifier($tenant);
+
+      $this->runProcess($this->output, [
+        'php', 'bin/console', MigrateCommand::NAME, $key, $version
+      ]);
+    }
+  }
+
   protected function migrateDefaultDatabase(string $version = null): void
   {
     $output = new BufferedOutput();
+
+    $output->writeln("Migrating default em ...");
+    $output->writeln("==================================================");
+
     $newInput = new ArrayInput([
       'version' => $version ?: 'latest',
       '--dry-run' => false,
       '--all-or-nothing' => true,
-      '--no-interaction' => true,
+      '--no-interaction' => false,
       '--em' => 'default',
       '--configuration' => $this->config['default'],
     ]);

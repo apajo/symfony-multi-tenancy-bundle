@@ -47,11 +47,11 @@ class MigrationManager
       $output = new BufferedOutput();
       $newInput = new ArrayInput([
         'version' => $version ?: 'latest',
-        '--dry-run' => true,
+        '--dry-run' => false,
         '--all-or-nothing' => true,
-        '--no-interaction' => true,
+        '--no-interaction' => false,
         '--em' => 'tenant',
-        '--configuration' => $this->config['default'],
+        '--configuration' => $this->config['tenant'],
       ]);
 
       $newInput->setInteractive(false);
