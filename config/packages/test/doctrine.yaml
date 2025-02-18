@@ -18,6 +18,9 @@ doctrine:
     default_entity_manager: default
     auto_generate_proxy_classes: true
     
+    controller_resolver:
+      auto_mapping: false
+    
     entity_managers:
       default:
         connection: default

@@ -12,7 +12,7 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader;
 use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\HttpKernel\DependencyInjection\Extension as Base;
+use Symfony\Component\DependencyInjection\Extension\Extension as Base;
 
 /**
  * This is the class that loads and manages your bundle configuration.

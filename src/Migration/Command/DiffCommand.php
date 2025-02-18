@@ -36,6 +36,9 @@ class DiffCommand extends AbstractCommand
     $this->config = $config;
   }
 
+  /**
+   * @return void
+   */
   protected function configure()
   {
     $this
