@@ -26,9 +26,8 @@ class TestKernel extends Kernel
   public function registerContainerConfiguration(LoaderInterface $loader): void
   {
     // Load bundle-specific config
-    $loader->load(__DIR__.'/../config/packages/test/config.yaml');
-    $loader->load(__DIR__.'/../config/packages/test/framework.yaml');
-    $loader->load(__DIR__.'/../config/packages/test/doctrine.yaml');
-    $loader->load(__DIR__.'/../config/packages/test/security.yaml');
+    $loader->load($this->getProjectDir().'/config/{packages}/test/*.yaml', 'glob');
+    $loader->load($this->getProjectDir().'/config/{services}_'.$this->environment.'.yaml', 'glob');
+
   }
 }

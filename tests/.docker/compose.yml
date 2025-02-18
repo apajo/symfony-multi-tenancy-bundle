@@ -1,0 +1,24 @@
+services:
+  tests:
+    build:
+      context: ./../
+      dockerfile: .docker/tests/Dockerfile
+      args:
+        TIMEZONE: "Europe/Helsinki"
+    container_name: tests
+    hostname: "tests"
+    command: "tail -f /dev/null"
+    # command: [ "./vendor/bin/simple-phpunit" ]
+    tty: true
+      
+  database:
+      build:
+          context: ./database
+      container_name: database
+      hostname: "database"
+      restart: always
+      ports:
+        - 33066:3306
+#      volumes:
+#          - /home/cicd/.ssh:/home/cicd/.ssh
+#          - ../bin/import.sh:/usr/local/bin/import.sh

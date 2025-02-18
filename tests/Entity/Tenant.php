@@ -1,6 +1,7 @@
 <?php
 
 namespace aPajo\MultiTenancyBundle\Tests\Entity;
+
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]

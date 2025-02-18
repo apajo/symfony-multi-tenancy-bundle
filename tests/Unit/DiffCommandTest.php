@@ -9,7 +9,6 @@ class DiffCommandTest extends AbstractTestCase
   {
     parent::setUp();
     self::bootKernel();
-    $this->container = self::$container;
   }
 
   /**
@@ -17,6 +16,6 @@ class DiffCommandTest extends AbstractTestCase
    */
   public function testDiffCommand()
   {
-    $this->runProcess(['php', 'bin/console', 'tenants:migrations:diff']);
+    $this->runProcess(['php', 'bin/console', '--env=test', 'tenants:migrations:diff', '-vvv']);
   }
 }

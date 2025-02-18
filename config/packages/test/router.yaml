@@ -1,0 +1,5 @@
+# config/packages/test/router.yaml
+framework:
+  router:
+    resource: '%kernel.project_dir%/config/routes.yaml'
+    strict_requirements: null
