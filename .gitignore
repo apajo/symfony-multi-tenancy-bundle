@@ -3,3 +3,4 @@ vendor
 .phpunit.result.cache
 var/cache
 var/log/*
+/migrations/**/Version*.php
