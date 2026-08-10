@@ -1,11 +1,19 @@
 apajo_multi_tenancy:
+  # Adapters reconfigure the system for the selected tenant.
+  # FilesystemAdapter is left out: it needs a live FTP server.
   adapters:
     - aPajo\MultiTenancyBundle\Adapter\Database\DatabaseAdapter
-  
-  tenant:                                   # Tenant (entity) configuration
-    class: aPajo\MultiTenancyBundle\Tests\Entity\Tenant  # Must implement TenantInterface
-    identifier: key                         # Identifier column name (must be unique field)
+    - aPajo\MultiTenancyBundle\Adapter\Mailer\MailerAdapter
 
-  migrations: # Tenant Migration configurations (relative to project root)
-    default: 'config/migrations/default.yml'
-    tenant: 'config/migrations/tenant.yml'
+  tenant:
+    class: aPajo\MultiTenancyBundle\Tests\Entity\Default\Tenant
+    identifier: key
+    # Must be an entity manager whose connection is NOT swapped by the
+    # DatabaseAdapter, or the tenant registry becomes unreachable mid-switch.
+    entity_manager: default
+    resolvers:
+      - aPajo\MultiTenancyBundle\Service\Resolver\HostBasedResolver
+
+  migrations:
+    default: '%kernel.project_dir%/config/migrations/default.yml'
+    tenant: '%kernel.project_dir%/config/migrations/tenant.yml'

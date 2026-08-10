@@ -273,9 +273,105 @@ class MyTenantService {
 
 ### Testing
 
+A Symfony bundle cannot run on its own, so this repository ships a minimal
+kernel — [`tests/TestKernel.php`](tests/TestKernel.php) — that registers
+FrameworkBundle, SecurityBundle, DoctrineBundle, DoctrineMigrationsBundle and
+this bundle, configured from `config/packages/test/*.yaml`. PHPUnit finds it
+through the `KERNEL_CLASS` variable in `phpunit.xml`. No host application is
+needed.
+
+Everything the suite needs runs in Docker — the only prerequisite is Docker with
+the Compose plugin:
+
 ```shell
-./vendor/bin/simple-phpunit
+make test    # start what is needed, run the full suite, stop it again
 ```
+
+The `test*` targets are self-contained: they bring the database up, run PHPUnit,
+tear the stack down afterwards and then exit with PHPUnit's own status, so a
+failing suite still fails the command. `make up` and `make down` are there for
+when you want the database to stay up between runs — for the host-side loop
+below, say. `make help` lists the rest: `build`, `test-unit`,
+`test-integration`, `test-db`, `shell`, `logs`.
+
+The suite is split into three tiers:
+
+| Suite | Location | Needs |
+|---|---|---|
+| `unit` | `tests/Unit` | nothing — plain `TestCase`, mocks only |
+| `integration` | `tests/Integration` | nothing — `ContainerBuilder` and a kernel boot |
+| `database` | `tests/Database` | a MySQL server |
+
+#### Running on the host
+
+The database container publishes `127.0.0.1:3306`, which is exactly what `.env`
+points at, so with `make up` running the suite works just as well from the
+host — usually the faster inner loop:
+
+```shell
+composer install
+
+composer test             # everything
+composer test:unit        # pure logic and mocks, no infrastructure
+composer test:integration # container wiring and a real kernel boot, no database
+composer test:db          # requires the database container
+```
+
+#### Database tests
+
+There is no `pdo_sqlite` on the supported platform, so the database tier runs
+against MySQL. It creates its own `mtb_default_test`, `mtb_tenant_test` and
+`mtb_tenant_alpha_test` schemas and never touches application data. The
+credentials are project-local and deliberately trivial — the container is
+disposable and holds nothing else:
+
+They live in `.env`, and only there:
+
+```dotenv
+DATABASE_HOST=127.0.0.1
+DEFAULT_DATABASE_URL=mysql://mtb:mtb@${DATABASE_HOST}:3306/mtb_default_test
+TENANT_DATABASE_URL=mysql://mtb:mtb@${DATABASE_HOST}:3306/mtb_tenant_test
+```
+
+The container and the host differ in one thing — where the server is — so
+`compose.yaml` sets `DATABASE_HOST=database` and nothing else. Editing the
+credentials in `.env` therefore affects every run, containerised or not.
+
+The bootstrap layers env files as follows, highest priority first: real
+environment variables, `.env.test.local` (gitignored), `.env.test`, `.env`.
+Use an exported variable or `.env.test.local` to aim the suite at some other
+server without touching the committed files.
+
+**When the server is unreachable the tier fails**: it exists to prove the
+adapters really switch connections, and a run that reports green without ever
+opening one proves nothing. For a run that needs no infrastructure, use
+`make test-unit` and `make test-integration` (or their `composer` equivalents).
+
+#### The containers
+
+`compose.yaml` defines two services:
+
+| Service | What it is |
+|---|---|
+| `database` | `mysql:8.0` on a tmpfs, seeded by `docker/mysql/init/`, published on `127.0.0.1:3306` |
+| `tests` | PHP 8.2 CLI runner built from `docker/php/Dockerfile`, with the repo bind-mounted at `/app` |
+
+The runner uses a bind mount rather than a copy-in image because
+`MigrationsTest` shells out to `bin/console` and writes into `migrations/`. It
+runs as the invoking user's uid/gid (exported by the `Makefile`) so nothing in
+the working tree ends up owned by root.
+
+#### Skipped tests
+
+Three tests are deliberately skipped. Each one asserts the *intended* behaviour
+of a known open bug and carries a doc block explaining the defect and its fix;
+each is paired with a companion test recording what the code currently does.
+Fixing a bug means deleting its `markTestSkipped()` line.
+
+`phpunit-baseline.xml` records PHP issues that are known and intentionally
+unfixed (currently one), so the build stays green while any *new* issue fails.
+Entries are content-hashed and retire themselves once the offending line
+changes.
 
 
 ## Issues

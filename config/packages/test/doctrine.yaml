@@ -1,26 +1,31 @@
 doctrine:
   dbal:
     default_connection: default
+
     connections:
+      # Registry of tenants. Never swapped at runtime.
       default:
         url: '%env(DEFAULT_DATABASE_URL)%'
         driver: pdo_mysql
-        charset: utf8
-        server_version: '8'
+        charset: utf8mb4
+        server_version: '8.0'
 
+      # Per-tenant connection. DatabaseAdapter reconstructs this one on every
+      # TenantSelectEvent, so nothing that must survive a tenant switch may
+      # live here.
       tenant:
         url: '%env(TENANT_DATABASE_URL)%'
-        driver:   pdo_mysql
-        charset:  utf8
-        server_version: '8'
+        driver: pdo_mysql
+        charset: utf8mb4
+        server_version: '8.0'
 
   orm:
     default_entity_manager: default
     auto_generate_proxy_classes: true
-    
+
     controller_resolver:
       auto_mapping: false
-    
+
     entity_managers:
       default:
         connection: default
@@ -29,4 +34,3 @@ doctrine:
       tenant:
         connection: tenant
         naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
-        mappings:

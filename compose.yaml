@@ -1,0 +1,62 @@
+# Test infrastructure for the bundle's own suite.
+#
+# This bundle is a library with no host application; the `database` test tier
+# still needs a real MySQL server, so the repo ships its own. Everything here is
+# disposable: the data directory is a tmpfs, the credentials are project-local
+# and deliberately trivial, and nothing outside this file knows about them.
+#
+#   make up     start the database
+#   make test   run the full suite in the runner container
+#   make down   throw it all away
+#
+# The database port is published, so the suite can equally be run straight from
+# the host with `composer test` against 127.0.0.1:3306.
+
+services:
+  database:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: mtb
+      MYSQL_DATABASE: mtb_default_test
+      MYSQL_USER: mtb
+      MYSQL_PASSWORD: mtb
+    ports:
+      - '3306:3306'
+    volumes:
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
+    # Test data never outlives the container. A tmpfs also means the init
+    # scripts run on every start, since they only fire on an empty data dir.
+    tmpfs:
+      - /var/lib/mysql
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', '127.0.0.1', '-uroot', '-pmtb']
+      interval: 3s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  tests:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    working_dir: /app
+    # Bind mount rather than a copy-in image: MigrationsTest shells out to
+    # bin/console and writes migrations/Version*.php, and phpunit resolves the
+    # baseline paths relative to the working directory.
+    volumes:
+      - .:/app
+    # Keeps files written into the bind mount owned by the invoking user.
+    # The Makefile exports UID/GID; the defaults cover a bare `docker compose`.
+    user: '${UID:-1000}:${GID:-1000}'
+    environment:
+      # The only thing that differs in here is where the server lives: on the
+      # compose network it is `database`, from the host it is 127.0.0.1. The
+      # DSNs themselves stay in .env, which interpolates this variable, so
+      # credentials live in exactly one place and editing them there is felt
+      # both inside and outside the container.
+      DATABASE_HOST: database
+      COMPOSER_HOME: /tmp/composer
+    depends_on:
+      database:
+        condition: service_healthy
+    command: ['vendor/bin/phpunit']

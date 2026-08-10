@@ -1,0 +1,2 @@
+# The bundle ships no routes. This file exists because SecurityBundle's
+# firewall configuration requires a working router in the test kernel.
