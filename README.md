@@ -260,7 +260,6 @@ Feel free to report an issue [under GitHub Issues](https://github.com/apajo/symf
 
 ### Known Issues
 
-* Resetting to default/initial tenant does not work
 * Symfony profiler currently shows only default entity managers migrations
 
 ## Contributing

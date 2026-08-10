@@ -51,6 +51,22 @@ class FilesystemAdapter extends Filesystem implements PropertyAdapterInterface
       ]
     );
 
+    // The register still holds File objects bound to the previous adapter.
+    $this->clearFileRegister();
+
+    return $this->adapter;
+  }
+
+  protected function captureDefault(): mixed
+  {
+    return $this->adapter;
+  }
+
+  protected function restoreDefault(mixed $default): mixed
+  {
+    $this->adapter = $default;
+    $this->clearFileRegister();
+
     return $this->adapter;
   }
 }

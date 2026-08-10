@@ -98,13 +98,13 @@ class EnvironmentProvider
   {
     $tenant = $event->getTenant();
 
-    // TODO: implement null-tenant handling
-    if (!$tenant instanceof TenantInterface) {
-      return;
-    }
-
     $this->adapterRegistry->getAdapters()->map(function (AdapterInterface $adapter) use ($tenant) {
-      $adapter->adapt($tenant);
+      // No tenant selected: every adapter goes back to its default configuration.
+      if (!$tenant instanceof TenantInterface) {
+        return $adapter->reset();
+      }
+
+      return $adapter->adapt($tenant);
     });
   }
 }

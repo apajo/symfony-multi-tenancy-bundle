@@ -19,11 +19,32 @@ class DatabaseAdapter implements PropertyAdapterInterface
 
   public function doAdapt(Dsn $dsn)
   {
-    /** @var Connection $connection */
-    $connection = $this->doctrine->getConnection('tenant');
+    $this->reconnect($this->getConnectionParams($dsn));
+  }
 
-    // Get new connection parameters
-    $newParams = $this->getConnectionParams(Dsn::fromString($dsn));
+  protected function captureDefault(): mixed
+  {
+    return $this->connection()->getParams();
+  }
+
+  protected function restoreDefault(mixed $default): mixed
+  {
+    $this->reconnect($default);
+
+    return null;
+  }
+
+  private function connection(): Connection
+  {
+    return $this->doctrine->getConnection('tenant');
+  }
+
+  /**
+   * Rebuild the tenant connection in place with a new set of parameters.
+   */
+  private function reconnect(array $params): void
+  {
+    $connection = $this->connection();
 
     // Close the existing connection if it is open
     if ($connection->isConnected()) {
@@ -31,7 +52,7 @@ class DatabaseAdapter implements PropertyAdapterInterface
     }
 
     $connection->__construct(
-      $newParams,
+      $params,
       $connection->getDriver(),
       $connection->getConfiguration(),
       $connection->getEventManager()
@@ -42,14 +63,23 @@ class DatabaseAdapter implements PropertyAdapterInterface
 
   private function getConnectionParams(Dsn $dsn): array
   {
-    return [
-      'dbname' => trim($dsn->getPath(), '/'),
+    $params = $this->getDefault() ?? [];
+
+    // The connection was configured from a URL, which would take precedence
+    // over the tenant values below if anything re-parsed these parameters.
+    unset($params['url']);
+
+    // Keep everything else the connection was configured with (charset,
+    // serverVersion, driverOptions, ...) and override only what the tenant
+    // DSN actually carries.
+    return array_merge($params, [
+      'dbname' => trim((string) $dsn->getPath(), '/'),
       'user' => $dsn->getUser(),
       'password' => $dsn->getPassword(),
       'host' => $dsn->getHost(),
       'port' => $dsn->getPort(),
       'driver' => sprintf('pdo_%s', $dsn->getScheme())
-    ];
+    ]);
   }
 
   public function __construct(
