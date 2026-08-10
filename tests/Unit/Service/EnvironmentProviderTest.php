@@ -153,8 +153,6 @@ class EnvironmentProviderTest extends TestCase
    */
   public function testForEachVisitsEveryTenant(): void
   {
-    $this->markTestSkipped('Pins known bug: EnvironmentProvider::forEach() uses Collection::forAll() and stops after the first tenant.');
-
     $tenants = new ArrayCollection([
       (new Tenant())->setKey('acme'),
       (new Tenant())->setKey('globex'),
@@ -168,27 +166,6 @@ class EnvironmentProviderTest extends TestCase
     });
 
     self::assertSame(['acme', 'globex', 'initech'], $visited);
-  }
-
-  /**
-   * Demonstrates the bug above without asserting the desired behaviour, so the
-   * suite records the current contract rather than merely skipping it.
-   */
-  public function testForEachCurrentlyStopsAfterTheFirstTenant(): void
-  {
-    $tenants = new ArrayCollection([
-      (new Tenant())->setKey('acme'),
-      (new Tenant())->setKey('globex'),
-      (new Tenant())->setKey('initech'),
-    ]);
-
-    $visited = [];
-
-    $this->provider()->forEach($tenants, function (TenantInterface $tenant) use (&$visited) {
-      $visited[] = $tenant->getKey();
-    });
-
-    self::assertSame(['acme'], $visited, 'see testForEachVisitsEveryTenant() for the intended behaviour');
   }
 
   // ---------------------------------------------------------------- helpers

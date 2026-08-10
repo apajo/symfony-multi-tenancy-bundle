@@ -11,8 +11,8 @@ use Doctrine\ORM\EntityRepository;
 class TenantManager
 {
   public function __construct(
-    private readonly ResolverRegistry $resolverRegistry,
-    private readonly TenantConfig     $config,
+    private ResolverRegistry $resolverRegistry,
+    private TenantConfig     $config,
   )
   {
   }

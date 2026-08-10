@@ -3,7 +3,9 @@
 namespace aPajo\MultiTenancyBundle\DependencyInjection;
 
 use aPajo\MultiTenancyBundle\APajoMultiTenancyBundle;
-use aPajo\MultiTenancyBundle\Service\EnvironmentProvider;
+use aPajo\MultiTenancyBundle\Migration\Command\DiffCommand;
+use aPajo\MultiTenancyBundle\Migration\Command\MigrateCommand;
+use aPajo\MultiTenancyBundle\Migration\MigrationManager;
 use aPajo\MultiTenancyBundle\Service\Registry\AdapterRegistry;
 use aPajo\MultiTenancyBundle\Service\Registry\ResolverRegistry;
 use aPajo\MultiTenancyBundle\Service\TenantConfig;
@@ -12,7 +14,7 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader;
 use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\DependencyInjection\Extension\Extension as Base;
+use Symfony\Component\HttpKernel\DependencyInjection\Extension as Base;
 
 /**
  * This is the class that loads and manages your bundle configuration.
@@ -25,7 +27,7 @@ class Extension extends Base
   /**
    * {@inheritdoc}
    */
-  public function load(array $configs, ContainerBuilder $container): void
+  public function load(array $configs, ContainerBuilder $container)
   {
     $this->loadConfig($configs, $container, 'services.yml');
 
@@ -36,6 +38,31 @@ class Extension extends Base
 
     if (!isset($bundles['DoctrineBundle'])) {
       throw new InvalidConfigurationException('DoctrineBundle is required by ' . APajoMultiTenancyBundle::class);
+    }
+
+    // Migration command configuration
+    if ($container->hasDefinition(DiffCommand::class)) {
+      $definition = $container->getDefinition(DiffCommand::class);
+      $definition->addMethodCall(
+        'setMigrationConfig',
+        [$cfg['migrations']]
+      );
+    }
+
+    if ($container->hasDefinition(MigrateCommand::class)) {
+      $definition = $container->getDefinition(MigrateCommand::class);
+      $definition->addMethodCall(
+        'setMigrationConfig',
+        [$cfg['migrations']]
+      );
+    }
+
+    if ($container->hasDefinition(MigrationManager::class)) {
+      $definition = $container->getDefinition(MigrationManager::class);
+      $definition->addMethodCall(
+        'setMigrationConfig',
+        [$cfg['migrations']]
+      );
     }
 
     // Adapter registry
@@ -61,23 +88,14 @@ class Extension extends Base
     // Config service
     if ($container->hasDefinition(TenantConfig::class)) {
       $definition = $container->getDefinition(TenantConfig::class);
-      $entityManagerServiceId = str_contains((string) $cfg['tenant']['entity_manager'], '.') ?
-        $cfg['tenant']['entity_manager'] :
-        sprintf('doctrine.orm.%s_entity_manager', $cfg['tenant']['entity_manager']);
+      $entityManagerServiceId = !str_contains($cfg['tenant']['entity_manager'], '.') ?
+        sprintf('doctrine.orm.%s_entity_manager', $cfg['tenant']['entity_manager']) :
+        $cfg['tenant']['entity_manager'];
 
       $emReference = new Reference($entityManagerServiceId);
 
       $definition->setArgument(0, $cfg);
       $definition->setArgument(1, $emReference);
-    }
-
-    // Set monolog er logger if exists
-    if (isset($bundles['MonologBundle'])) {
-      $definition = $container->getDefinition(EnvironmentProvider::class);
-      $definition->addMethodCall(
-        'setLogger',
-        [new Reference('monolog.logger')]
-      );
     }
   }
 
@@ -88,7 +106,7 @@ class Extension extends Base
     $loader->load($name);
   }
 
-  public function getContainerExtension(): string
+  public function getContainerExtension()
   {
     return 'apajo_multi_tenancy';
   }

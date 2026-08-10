@@ -26,7 +26,7 @@ class HostBasedResolver implements TenantResolverInterface
     if (
       $this->getUser(false) &&
       $tenant = $this->resolveByCrits([
-        $this->config->getTenantIdentifierColumn() => $this->getUser()->getTenant()
+        $this->config->getTenantIdentifierColumn() => $this->getUser()?->getTenant()
       ])
     ) {
       return $tenant;
@@ -57,9 +57,11 @@ class HostBasedResolver implements TenantResolverInterface
       return null;
     }
 
-    if (!$token = $this->tokenstorage->getToken()) {
+    if (!($this->tokenstorage->getToken() instanceof TokenInterface)) {
       return null;
     }
+
+    $token = $this->tokenstorage->getToken();
 
     if (!is_object($user = $token->getUser())) {
       // e.g. anonymous authentication

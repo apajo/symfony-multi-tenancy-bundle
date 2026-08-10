@@ -13,9 +13,9 @@ use aPajo\MultiTenancyBundle\Service\Registry\AdapterRegistry;
 use aPajo\MultiTenancyBundle\Service\Registry\ResolverRegistry;
 use aPajo\MultiTenancyBundle\Service\Resolver\HostBasedResolver;
 use aPajo\MultiTenancyBundle\Service\TenantConfig;
+use aPajo\MultiTenancyBundle\Tests\AbstractKernelTestCase;
 use aPajo\MultiTenancyBundle\Tests\Entity\Default\Tenant;
 use PHPUnit\Framework\Attributes\DataProvider;
-use aPajo\MultiTenancyBundle\Tests\AbstractKernelTestCase;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**

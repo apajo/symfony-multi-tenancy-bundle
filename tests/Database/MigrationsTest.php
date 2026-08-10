@@ -2,6 +2,7 @@
 
 namespace aPajo\MultiTenancyBundle\Tests\Database;
 
+use aPajo\MultiTenancyBundle\Adapter\Dsn;
 use aPajo\MultiTenancyBundle\Migration\Command\DiffCommand;
 use aPajo\MultiTenancyBundle\Migration\Command\MigrateCommand;
 use aPajo\MultiTenancyBundle\Migration\MigrationManager;
@@ -42,6 +43,8 @@ class MigrationsTest extends AbstractDatabaseTestCase
 
   protected function tearDown(): void
   {
+    // Must run: migrations are really applied now, so a leftover file from an
+    // earlier run replays CREATE TABLE against a schema that already has it.
     foreach ($this->generated as $file) {
       $this->filesystem->remove($file);
     }
@@ -89,6 +92,28 @@ class MigrationsTest extends AbstractDatabaseTestCase
 
   public function testDiffCommandGeneratesMigrationsForBothEntityManagers(): void
   {
+    $generated = $this->generateMigrations();
+
+    foreach (['default', 'tenant'] as $namespace) {
+      self::assertNotEmpty(
+        $generated[$namespace],
+        sprintf('expected a migration to be generated for the %s namespace', $namespace)
+      );
+    }
+  }
+
+  /**
+   * Run `tenants:migrations:diff` and return the files it produced, keyed by
+   * namespace. Every file is registered for removal in tearDown().
+   *
+   * The migrate tests need a migration to apply and must not depend on one left
+   * behind by an earlier run: migrations are really applied now, so a stale file
+   * would replay its CREATE TABLE against a schema that already has it.
+   *
+   * @return array{default: list<string>, tenant: list<string>}
+   */
+  private function generateMigrations(): array
+  {
     $before = [
       'default' => $this->migrationFiles('default'),
       'tenant' => $this->migrationFiles('tenant'),
@@ -99,7 +124,7 @@ class MigrationsTest extends AbstractDatabaseTestCase
     $this->dropAllTables('tenant');
 
     $process = new Process(
-      ['php', 'bin/console', 'tenants:migrations:diff', '--no-interaction'],
+      ['php', 'bin/console', 'tenants:migrations:diff'],
       $this->projectDir()
     );
     $process->setTimeout(120);
@@ -110,16 +135,23 @@ class MigrationsTest extends AbstractDatabaseTestCase
       'tenants:migrations:diff failed: ' . $process->getErrorOutput() . $process->getOutput()
     );
 
+    $generated = [];
+
     foreach (['default', 'tenant'] as $namespace) {
       $new = array_values(array_diff($this->migrationFiles($namespace), $before[$namespace]));
-      $this->generated = array_merge($this->generated, $new);
 
-      self::assertNotEmpty($new, sprintf('expected a migration to be generated for the %s namespace', $namespace));
+      $generated[$namespace] = $new;
+      $this->generated = array_merge($this->generated, $new);
     }
+
+    return $generated;
   }
 
   public function testMigrationManagerRunsInsideTheTenantEnvironment(): void
   {
+    $this->generateMigrations();
+    $this->dropAllTablesIn(self::ALTERNATE_TENANT_SCHEMA);
+
     $manager = $this->container->get(MigrationManager::class);
 
     $tenant = (new Tenant())
@@ -141,11 +173,15 @@ class MigrationsTest extends AbstractDatabaseTestCase
 
   public function testMigrateByKeyLooksTheTenantUpByItsIdentifier(): void
   {
+    $this->generateMigrations();
+    $this->dropAllTablesIn(self::ALTERNATE_TENANT_SCHEMA);
     $this->seedTenant();
 
     $manager = $this->container->get(MigrationManager::class);
 
     $manager->migrateByKey('acme');
+
+
 
     self::assertSame(
       'key',
@@ -153,65 +189,30 @@ class MigrationsTest extends AbstractDatabaseTestCase
     );
   }
 
-  /**
-   * Pins bug #2 -- currently failing, hence skipped.
-   *
-   * MigrationManager::migrate() builds its ArrayInput inside a closure that
-   * never imports $version:
-   *
-   *     public function migrate(TenantInterface $tenant, string $version = null): bool
-   *     {
-   *       $this->environmentProvider->for($tenant, function (...) {
-   *         'version' => $version ?: 'latest',
-   *
-   * $version is undefined in that scope, so it is always null and every call
-   * silently migrates to 'latest'. Two further defects sit in the same method:
-   * '--dry-run' => true is hardcoded, so tenant migrations are never actually
-   * applied; and '--configuration' points at $this->config['default'] rather
-   * than ['tenant'], so the wrong migration set is loaded. The method also
-   * declares : bool but returns 0.
-   *
-   * Fix: `function (...) use ($version) {`, drop the hardcoded dry-run, and use
-   * $this->config['tenant']; then delete this skip.
-   *
-   * @see src/Migration/MigrationManager.php:44
-   */
   public function testMigrateHonoursTheRequestedVersion(): void
   {
-    self::markTestSkipped('Pins known bug: MigrationManager::migrate() never imports $version into its closure, and hardcodes --dry-run.');
+    // Registered migrations must exist, or the command would fail for the
+    // wrong reason and the assertion below would prove nothing.
+    $this->generateMigrations();
+    $this->dropAllTablesIn(self::ALTERNATE_TENANT_SCHEMA);
 
+    /** @var MigrationManager $manager */
     $manager = $this->container->get(MigrationManager::class);
 
     $tenant = (new Tenant())
       ->setKey('acme')
       ->setDatabase(self::tenantDsn(self::ALTERNATE_TENANT_SCHEMA));
 
-    // With a bogus version the underlying Doctrine command must fail loudly
-    // rather than quietly migrating to 'latest'.
+    // An unknown version must fail loudly rather than quietly migrating to
+    // 'latest'. That the argument reaches the command at all is what this pins:
+    // it used to be dropped, because the closure building the ArrayInput never
+    // imported $version.
+    //
+    // Not '00000000000000' -- Doctrine reads that as "revert everything", which
+    // is a legitimate no-op here and would pass without the version mattering.
     $this->expectException(\Throwable::class);
 
-    $manager->migrate($tenant, '00000000000000');
-  }
-
-  /**
-   * Records the current contract: a bogus version is ignored instead of
-   * rejected. See the skipped test above.
-   *
-   * Like the two tests above, this exercises the buggy method and therefore
-   * emits the known "Undefined variable $version" warning, which is recorded
-   * in tests/baseline.xml.
-   */
-  public function testRequestedVersionIsCurrentlyIgnored(): void
-  {
-    $manager = $this->container->get(MigrationManager::class);
-
-    $tenant = (new Tenant())
-      ->setKey('acme')
-      ->setDatabase(self::tenantDsn(self::ALTERNATE_TENANT_SCHEMA));
-
-    $manager->migrate($tenant, '00000000000000');
-
-    self::assertTrue(true, 'no exception: the version argument never reaches the migration command');
+    $manager->migrate($tenant, '99999999999999');
   }
 
   private function seedTenant(): void
@@ -230,6 +231,35 @@ class MigrationsTest extends AbstractDatabaseTestCase
     );
     $em->flush();
     $em->clear();
+  }
+
+  /**
+   * Empty an arbitrary schema, addressed by name rather than through a
+   * configured connection.
+   *
+   * Migrations are really applied now (they used to run with --dry-run), so the
+   * schema a migration targets has to start empty. The alternate tenant schema
+   * is shared with DatabaseAdapterTest, which leaves its own tables behind.
+   */
+  private function dropAllTablesIn(string $schema): void
+  {
+    $dsn = Dsn::fromString(self::tenantDsn($schema));
+
+    $pdo = new \PDO(
+      sprintf('mysql:host=%s;port=%d;dbname=%s', $dsn->getHost(), $dsn->getPort(3306), $schema),
+      $dsn->getUser(),
+      $dsn->getPassword(),
+      [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]
+    );
+
+    $pdo->exec('SET FOREIGN_KEY_CHECKS=0');
+
+    foreach ($pdo->query('SHOW TABLES')->fetchAll(\PDO::FETCH_COLUMN) as $table) {
+      // Identifiers come from SHOW TABLES on a schema we just created.
+      $pdo->exec(sprintf('DROP TABLE IF EXISTS `%s`', $table));
+    }
+
+    $pdo->exec('SET FOREIGN_KEY_CHECKS=1');
   }
 
   private function dropAllTables(string $manager): void

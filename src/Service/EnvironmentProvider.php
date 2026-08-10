@@ -31,7 +31,7 @@ class EnvironmentProvider
    */
   public function forEach(Collection $tenants, callable $callback): void
   {
-    $tenants->forAll(function (int $index, TenantInterface $tenant) use ($callback) {
+    $tenants->map(function (TenantInterface $tenant) use ($callback) {
       $this->for($tenant, $callback);
     });
   }

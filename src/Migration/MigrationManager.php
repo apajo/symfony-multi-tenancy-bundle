@@ -21,7 +21,7 @@ class MigrationManager
 
   public function __construct(
     private readonly KernelInterface     $kernel,
-    protected DependencyFactory $dependencyFactory,
+    private readonly DependencyFactory $dependencyFactory,
     private readonly EnvironmentProvider $environmentProvider,
     private readonly TenantConfig        $tenantConfig,
   )
@@ -43,7 +43,7 @@ class MigrationManager
 
   public function migrate(TenantInterface $tenant, string $version = null): bool
   {
-    $this->environmentProvider->for($tenant, function (TenantInterface $tenant, EntityManagerInterface $em) use ($version): void {
+    $this->environmentProvider->for($tenant, function (TenantInterface $tenant, EntityManagerInterface $em) use ($version) {
       $output = new BufferedOutput();
       $newInput = new ArrayInput([
         'version' => $version ?: 'latest',
@@ -60,9 +60,9 @@ class MigrationManager
       $application = new Application($this->kernel);
       $application->setAutoExit(false);
       $exitCode = $application->add($migrateCommand)->run($newInput, $output);
-
+      
       if ($exitCode !== 0) {
-        throw new RuntimeException('Migration failed');
+        throw new RuntimeException('Migration failed!' . PHP_EOL . $output->fetch());
       }
     });
 

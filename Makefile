@@ -9,12 +9,14 @@ COMPOSE  := docker compose
 RUN      := $(COMPOSE) run --rm tests
 # --no-deps skips the database dependency for the tiers that must not need one.
 RUN_SOLO := $(COMPOSE) run --rm --no-deps tests
-DOWN     := $(COMPOSE) down -v --remove-orphans
+DOWN     := $(COMPOSE) down -v --remove-orphans --volumes
 
 # The test targets leave nothing running: they tear the stack down afterwards
 # and then exit with phpunit's own status, so a failing suite still fails the
 # command. Each recipe line is a separate shell, hence the one-liners.
 teardown-and-exit = ; status=$$?; $(DOWN); exit $$status
+
+MAKEFLAGS += --no-print-directory
 
 .PHONY: help build up down test test-unit test-integration test-db shell logs
 
@@ -33,15 +35,19 @@ down: ## Stop everything and discard the database
 
 test: ## Run the full suite, then stop the containers
 	@$(RUN) vendor/bin/phpunit $(teardown-and-exit)
+	make down
 
 test-unit: ## Run the unit suite (needs no database)
 	@$(RUN_SOLO) vendor/bin/phpunit --testsuite unit $(teardown-and-exit)
+	make down
 
 test-integration: ## Run the integration suite (needs no database)
 	@$(RUN_SOLO) vendor/bin/phpunit --testsuite integration $(teardown-and-exit)
+	make down
 
 test-db: ## Run the database suite, then stop the containers
 	@$(RUN) vendor/bin/phpunit --testsuite database $(teardown-and-exit)
+	make down
 
 shell: ## Open a shell in the runner container
 	$(RUN) bash

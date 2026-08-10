@@ -1,10 +1,2 @@
 <?xml version="1.0"?>
-<files version="1">
- <file path="src/Migration/MigrationManager.php">
-  <line number="49" hash="5b3b3bbb8478ec21cd625d743c5a9ead12599df4">
-   <issue><![CDATA[Undefined variable $version]]></issue>
-   <issue><![CDATA[Undefined variable $version]]></issue>
-   <issue><![CDATA[Undefined variable $version]]></issue>
-  </line>
- </file>
-</files>
+<files version="1"/>

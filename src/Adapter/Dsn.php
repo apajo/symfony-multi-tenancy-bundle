@@ -5,11 +5,25 @@ namespace aPajo\MultiTenancyBundle\Adapter;
 use aPajo\MultiTenancyBundle\Exception\InvalidArgumentException;
 use SensitiveParameter;
 
-final class Dsn implements \Stringable
+final class Dsn
 {
-  public function __construct(private readonly string $scheme, private readonly string $host, private readonly ?string $user = null, #[SensitiveParameter]
- private readonly ?string $password = null, private readonly ?int $port = null, private readonly ?string $path = null, private array $options = [])
+  private string $scheme;
+  private string $host;
+  private ?string $user;
+  private ?string $password;
+  private ?int $port;
+  private ?string $path;
+  private array $options;
+
+  public function __construct(string $scheme, string $host, ?string $user = null, #[SensitiveParameter] ?string $password = null, ?int $port = null, ?string $path = null, array $options = [])
   {
+    $this->scheme = $scheme;
+    $this->host = $host;
+    $this->user = $user;
+    $this->password = $password;
+    $this->port = $port;
+    $this->path = $path;
+    $this->options = $options;
   }
 
   public static function fromString(#[SensitiveParameter] string $dsn): self
