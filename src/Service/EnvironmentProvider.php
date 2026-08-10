@@ -12,13 +12,10 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface as SymfonyEventDispatcherInterface;
-use Monolog\Logger;
 
 #[AsEventListener(event: TenantSelectEvent::class, method: 'onTenantSelectEvent')]
 class EnvironmentProvider
 {
-  protected ?Logger $logger;
-
   public function __construct(
     protected SymfonyEventDispatcherInterface $dispatcher,
     protected TenantAware                     $tenantAware,
@@ -34,18 +31,9 @@ class EnvironmentProvider
    */
   public function forEach(Collection $tenants, callable $callback): void
   {
-    $tenants->map(function (TenantInterface $tenant) use ($callback) {
-      try {
-        $this->for($tenant, $callback);
-      } catch (\Throwable $e) {
-        //throw $e;
-      }
+    $tenants->forAll(function (int $index, TenantInterface $tenant) use ($callback) {
+      $this->for($tenant, $callback);
     });
-  }
-
-  public function setLogger(Logger $logger): void
-  {
-    $this->logger = $logger;
   }
 
   /**
@@ -110,29 +98,13 @@ class EnvironmentProvider
   {
     $tenant = $event->getTenant();
 
-    // TODO: implement null-tenant handling
-    if (!$tenant instanceof TenantInterface) {
-      return;
-    }
-
-    $this->log('Selecting tenant: ' . $tenant?->getId(), Logger::DEBUG);
     $this->adapterRegistry->getAdapters()->map(function (AdapterInterface $adapter) use ($tenant) {
-      $this->log('Applying adapter: ' . $adapter::class, Logger::DEBUG);
+      // No tenant selected: every adapter goes back to its default configuration.
+      if (!$tenant instanceof TenantInterface) {
+        return $adapter->reset();
+      }
 
-      $adapter->adapt($tenant);
+      return $adapter->adapt($tenant);
     });
-
-    $this->log('Selected tenant: ' . $tenant?->getId());
-  }
-
-  protected function log(string $message, $level = null): void
-  {
-    if (!$this->logger) {
-      return;
-    }
-
-    $level = $level ?: Logger::ALERT;
-
-    $this->logger->log($level, $message, ['channel' => 'tenant']);
   }
 }
