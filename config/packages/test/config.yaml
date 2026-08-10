@@ -2,11 +2,21 @@ when@test:
   doctrine:
     orm:
       entity_managers:
+        # The tenant registry lives on the default connection, which is never
+        # swapped -- see config/packages/test/doctrine.yaml.
         default:
           mappings:
-            App:
+            TestsDefault:
               is_bundle: false
               type: attribute
-              dir: '%kernel.project_dir%/tests/Entity'
-              prefix: 'App\Entity'
-              alias: App
+              dir: '%kernel.project_dir%/tests/Entity/Default'
+              prefix: 'aPajo\MultiTenancyBundle\Tests\Entity\Default'
+
+        # Per-tenant data, reachable only through the swapped connection.
+        tenant:
+          mappings:
+            TestsTenant:
+              is_bundle: false
+              type: attribute
+              dir: '%kernel.project_dir%/tests/Entity/Tenant'
+              prefix: 'aPajo\MultiTenancyBundle\Tests\Entity\Tenant'

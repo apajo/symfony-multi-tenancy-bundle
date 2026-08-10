@@ -1,15 +1,14 @@
-# see https://symfony.com/doc/current/reference/configuration/framework.html
 framework:
     secret: '%env(APP_SECRET)%'
+    test: true
+    http_method_override: false
 
-    # Note that the session will be started ONLY if you read or write from it.
-    session: true
+    # SecurityBundle's channel listener depends on router.request_context, so
+    # the router has to exist even though the bundle exposes no routes.
+    router:
+        resource: '%kernel.project_dir%/config/routes.yaml'
+        utf8: true
+        strict_requirements: null
 
-    #esi: true
-    #fragments: true
-
-when@test:
-    framework:
-        test: true
-        session:
-            storage_factory_id: session.storage.factory.mock_file
+    session:
+        storage_factory_id: session.storage.factory.mock_file

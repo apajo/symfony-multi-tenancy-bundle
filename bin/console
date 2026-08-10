@@ -2,7 +2,6 @@
 <?php
 
 use aPajo\MultiTenancyBundle\Tests\TestKernel;
-use App\Kernel;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 
 if (!is_dir(dirname(__DIR__).'/vendor')) {

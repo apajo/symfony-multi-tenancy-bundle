@@ -1,7 +1,7 @@
 vendor
 .idea
-.phpunit.result.cache
-var/cache
-var/log/*
-/migrations/**/Version*.php
 .phpunit.cache
+/var
+.env.local
+.env.*.local
+/migrations/**/Version*.php
