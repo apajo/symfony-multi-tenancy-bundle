@@ -64,6 +64,13 @@ class EnvironmentProvider
     call_user_func($callback, $tenant, $this->tenantConfig->getEntityManager());
     // });
 
+    // Each tenant is a separate database connection (see DatabaseAdapter), so
+    // entities loaded/persisted while this tenant was selected are meaningless
+    // once we move on to the next one. Without clearing, the identity map keeps
+    // them around and a later tenant assigning the same id to a different row
+    // throws Doctrine\ORM\Exception\EntityIdentityCollisionException.
+    $this->tenantConfig->getEntityManager()->clear();
+
     $this->reset();
   }
 
