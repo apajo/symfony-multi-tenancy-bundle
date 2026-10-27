@@ -36,6 +36,7 @@ if ($envFiles !== [] && class_exists(Dotenv::class)) {
 // Fallbacks, so the unit and integration suites run even with no env files at
 // all. Mirrors .env; DATABASE_HOST is the one part compose swaps out.
 $databaseHost = $_SERVER['DATABASE_HOST'] ?? $_ENV['DATABASE_HOST'] ?? (getenv('DATABASE_HOST') ?: '127.0.0.1');
+$databasePort = $_SERVER['DATABASE_PORT'] ?? $_ENV['DATABASE_PORT'] ?? (getenv('DATABASE_PORT') ?: '49173');
 
 $defaults = [
     'APP_ENV' => 'test',
@@ -43,8 +44,9 @@ $defaults = [
     'APP_SECRET' => 'test-secret-not-used-outside-tests',
     'MAILER_DSN' => 'null://null',
     'DATABASE_HOST' => $databaseHost,
-    'DEFAULT_DATABASE_URL' => sprintf('mysql://mtb:mtb@%s:3306/mtb_default_test', $databaseHost),
-    'TENANT_DATABASE_URL' => sprintf('mysql://mtb:mtb@%s:3306/mtb_tenant_test', $databaseHost),
+    'DATABASE_PORT' => $databasePort,
+    'DEFAULT_DATABASE_URL' => sprintf('mysql://mtb:mtb@%s:%s/mtb_default_test', $databaseHost, $databasePort),
+    'TENANT_DATABASE_URL' => sprintf('mysql://mtb:mtb@%s:%s/mtb_tenant_test', $databaseHost, $databasePort),
 ];
 
 foreach ($defaults as $key => $value) {

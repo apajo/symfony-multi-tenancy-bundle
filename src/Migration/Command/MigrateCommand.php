@@ -105,7 +105,6 @@ class MigrateCommand extends AbstractCommand
       '--dry-run' => false,
       '--all-or-nothing' => true,
       '--no-interaction' => true,
-      '--em' => 'default',
       '--configuration' => $this->config['default'],
     ]);
 

@@ -280,7 +280,7 @@ The suite is split into three tiers:
 
 #### Running on the host
 
-The database container publishes `127.0.0.1:3306`, which is exactly what `.env`
+The database container publishes `127.0.0.1:49173`, which is exactly what `.env`
 points at, so with `make up` running the suite works just as well from the
 host — usually the faster inner loop:
 
@@ -305,12 +305,13 @@ They live in `.env`, and only there:
 
 ```dotenv
 DATABASE_HOST=127.0.0.1
-DEFAULT_DATABASE_URL=mysql://mtb:mtb@${DATABASE_HOST}:3306/mtb_default_test
-TENANT_DATABASE_URL=mysql://mtb:mtb@${DATABASE_HOST}:3306/mtb_tenant_test
+DATABASE_PORT=49173
+DEFAULT_DATABASE_URL=mysql://mtb:mtb@${DATABASE_HOST}:${DATABASE_PORT}/mtb_default_test
+TENANT_DATABASE_URL=mysql://mtb:mtb@${DATABASE_HOST}:${DATABASE_PORT}/mtb_tenant_test
 ```
 
-The container and the host differ in one thing — where the server is — so
-`compose.yaml` sets `DATABASE_HOST=database` and nothing else. Editing the
+The container and the host differ in host and port, so `compose.yaml` sets
+`DATABASE_HOST=database` and `DATABASE_PORT=3306`. Editing the
 credentials in `.env` therefore affects every run, containerised or not.
 
 The bootstrap layers env files as follows, highest priority first: real
@@ -329,7 +330,7 @@ opening one proves nothing. For a run that needs no infrastructure, use
 
 | Service | What it is |
 |---|---|
-| `database` | `mysql:8.0` on a tmpfs, seeded by `docker/mysql/init/`, published on `127.0.0.1:3306` |
+| `database` | `mysql:8.0` on a tmpfs, seeded by `docker/mysql/init/`, published on `127.0.0.1:49173` |
 | `tests` | PHP 8.2 CLI runner built from `docker/php/Dockerfile`, with the repo bind-mounted at `/app` |
 
 The runner uses a bind mount rather than a copy-in image because

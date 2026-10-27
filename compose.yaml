@@ -9,8 +9,9 @@
 #   make test   run the full suite in the runner container
 #   make down   throw it all away
 #
-# The database port is published, so the suite can equally be run straight from
-# the host with `composer test` against 127.0.0.1:3306.
+# The database port is published on 49173 to avoid colliding with application
+# databases that commonly use 3306. The container runner uses the private
+# Compose network and connects to database:3306.
 
 services:
   database:
@@ -21,7 +22,7 @@ services:
       MYSQL_USER: mtb
       MYSQL_PASSWORD: mtb
     ports:
-      - '3306:3306'
+      - '49173:3306'
     volumes:
       - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
     # Test data never outlives the container. A tmpfs also means the init
@@ -55,6 +56,7 @@ services:
       # credentials live in exactly one place and editing them there is felt
       # both inside and outside the container.
       DATABASE_HOST: database
+      DATABASE_PORT: 3306
       COMPOSER_HOME: /tmp/composer
     depends_on:
       database:

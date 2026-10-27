@@ -96,7 +96,8 @@ class MigrationsTest extends AbstractDatabaseTestCase
 
   public function testMigrationCommandUsesItsOwnFactoryWhenSharedFactoryIsFrozen(): void
   {
-    $this->generateMigrations();
+    $generated = $this->generateMigrations();
+    self::assertNotEmpty($generated['default'], 'the default manager needs a migration to apply');
 
     $this->container->get('doctrine.migrations.dependency_factory')->freeze();
 
@@ -104,10 +105,21 @@ class MigrationsTest extends AbstractDatabaseTestCase
     $application->setAutoExit(false);
     $application->add($this->container->get(MigrateCommand::class));
 
-    $input = new ArrayInput(['tenant_id' => 'no-such-tenant']);
+    $input = new ArrayInput([
+      'command' => 'tenants:migrations:migrate',
+      'tenant_id' => 'no-such-tenant',
+    ]);
     $input->setInteractive(false);
 
     self::assertSame(Command::SUCCESS, $application->run($input, new BufferedOutput()));
+
+    /** @var Registry $doctrine */
+    $doctrine = $this->container->get('doctrine');
+    self::assertGreaterThan(
+      0,
+      (int) $doctrine->getConnection('default')->fetchOne('SELECT COUNT(*) FROM doctrine_migration_versions'),
+      'the default migration must run through its factory-bound entity manager'
+    );
   }
 
   public function testDiffCommandGeneratesMigrationsForBothEntityManagers(): void
