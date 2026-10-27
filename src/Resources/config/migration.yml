@@ -14,5 +14,3 @@ services:
   
   aPajo\MultiTenancyBundle\Migration\MigrationManager:
     public: true
-    arguments:
-      $dependencyFactory: '@doctrine.migrations.dependency_factory'

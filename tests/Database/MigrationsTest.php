@@ -171,6 +171,26 @@ class MigrationsTest extends AbstractDatabaseTestCase
     );
   }
 
+  public function testMigrationManagerUsesFreshDependenciesWhenDoctrineFactoryIsFrozen(): void
+  {
+    $this->generateMigrations();
+    $this->dropAllTablesIn(self::ALTERNATE_TENANT_SCHEMA);
+
+    $manager = $this->container->get(MigrationManager::class);
+    $tenantFactory = $this->container->get('doctrine.migrations.dependency_factory');
+    $tenantFactory->freeze();
+
+    $alternateTenant = (new Tenant())
+      ->setKey('alpha')
+      ->setDatabase(self::tenantDsn(self::ALTERNATE_TENANT_SCHEMA));
+    $defaultTenant = (new Tenant())
+      ->setKey('beta')
+      ->setDatabase(self::tenantDsn(self::TENANT_SCHEMA));
+
+    self::assertTrue($manager->migrate($alternateTenant));
+    self::assertTrue($manager->migrate($defaultTenant));
+  }
+
   public function testMigrateByKeyLooksTheTenantUpByItsIdentifier(): void
   {
     $this->generateMigrations();
