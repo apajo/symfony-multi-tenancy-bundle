@@ -18,7 +18,7 @@ use Symfony\Component\HttpKernel\KernelInterface;
 
 class MigrationManager
 {
-  protected array $config;
+  protected array $config = [];
 
 
   public function __construct(
@@ -48,7 +48,9 @@ class MigrationManager
       // Doctrine freezes a DependencyFactory when its first command initializes.
       // Each tenant needs a factory bound to the active tenant entity manager.
       $dependencyFactory = DependencyFactory::fromEntityManager(
-        new ConfigurationFileWithFallback($this->config['tenant']),
+        new ConfigurationFileWithFallback(
+          $this->config['tenant'] ?? $this->kernel->getProjectDir() . '/config/migrations/tenant.yml'
+        ),
         new ExistingEntityManager($em),
       );
 
@@ -58,7 +60,7 @@ class MigrationManager
         '--dry-run' => false,
         '--all-or-nothing' => true,
         '--no-interaction' => true,
-        '--configuration' => $this->config['tenant'],
+        '--configuration' => $this->config['tenant'] ?? $this->kernel->getProjectDir() . '/config/migrations/tenant.yml',
       ]);
 
       $newInput->setInteractive(false);
