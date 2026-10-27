@@ -6,8 +6,10 @@ use aPajo\MultiTenancyBundle\Entity\TenantInterface;
 use aPajo\MultiTenancyBundle\Migration\MigrationManager;
 use aPajo\MultiTenancyBundle\Service\TenantConfig;
 use aPajo\MultiTenancyBundle\Service\TenantManager;
-use Doctrine\Migrations\DependencyFactory;
+use Doctrine\Migrations\Configuration\EntityManager\ExistingEntityManager;
+use Doctrine\Migrations\Configuration\Migration\ConfigurationFileWithFallback;
 use Doctrine\Migrations\Tools\Console\Command\MigrateCommand as DoctrineMigrateCommand;
+use Doctrine\Persistence\ManagerRegistry;
 use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -34,7 +36,7 @@ class MigrateCommand extends AbstractCommand
     private TenantManager       $tenantManager,
     private TenantConfig        $tenantConfig,
     private KernelInterface     $kernel,
-    protected DependencyFactory $dependencyFactory,
+    private ManagerRegistry     $doctrine,
   )
   {
     parent::__construct();
@@ -89,6 +91,13 @@ class MigrateCommand extends AbstractCommand
 
   protected function migrateDefaultDatabase(string $version = null): void
   {
+    // The shared Doctrine migrations factory is frozen after its first command
+    // runs. Build a command-local factory so repeated invocations stay usable.
+    $dependencyFactory = DependencyFactory::fromEntityManager(
+      new ConfigurationFileWithFallback($this->config['default']),
+      new ExistingEntityManager($this->doctrine->getManager('default')),
+    );
+
     $output = new BufferedOutput();
     $newInput = new ArrayInput([
       'version' => $version ?: 'latest',
@@ -100,7 +109,7 @@ class MigrateCommand extends AbstractCommand
     ]);
 
     $newInput->setInteractive(false);
-    $migrateCommand = new DoctrineMigrateCommand($this->dependencyFactory);
+    $migrateCommand = new DoctrineMigrateCommand($dependencyFactory);
 
     $application = new Application($this->kernel);
     $application->setAutoExit(false);

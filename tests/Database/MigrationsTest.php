@@ -179,6 +179,7 @@ class MigrationsTest extends AbstractDatabaseTestCase
     $manager = $this->container->get(MigrationManager::class);
     $tenantFactory = $this->container->get('doctrine.migrations.dependency_factory');
     $tenantFactory->freeze();
+    self::assertTrue($tenantFactory->isFrozen());
 
     $alternateTenant = (new Tenant())
       ->setKey('alpha')
@@ -188,7 +189,15 @@ class MigrationsTest extends AbstractDatabaseTestCase
       ->setDatabase(self::tenantDsn(self::TENANT_SCHEMA));
 
     self::assertTrue($manager->migrate($alternateTenant));
+    self::assertTrue(
+      $tenantFactory->isFrozen(),
+      'tenant migrations must not try to reconfigure Doctrine\'s shared frozen factory'
+    );
     self::assertTrue($manager->migrate($defaultTenant));
+    self::assertTrue(
+      $tenantFactory->isFrozen(),
+      'migrating another tenant must leave the shared factory untouched'
+    );
   }
 
   public function testMigrateByKeyLooksTheTenantUpByItsIdentifier(): void
