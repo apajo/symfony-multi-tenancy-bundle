@@ -10,6 +10,7 @@ use Doctrine\Migrations\Configuration\Migration\ConfigurationFileWithFallback;
 use Doctrine\Migrations\DependencyFactory;
 use Doctrine\Migrations\Tools\Console\Command\MigrateCommand;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ManagerRegistry;
 use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -25,6 +26,7 @@ class MigrationManager
     private readonly KernelInterface     $kernel,
     private readonly EnvironmentProvider $environmentProvider,
     private readonly TenantConfig        $tenantConfig,
+    private readonly ManagerRegistry    $doctrine,
   )
   {
   }
@@ -44,7 +46,15 @@ class MigrationManager
 
   public function migrate(TenantInterface $tenant, string $version = null): bool
   {
-    $this->environmentProvider->for($tenant, function (TenantInterface $tenant, EntityManagerInterface $em) use ($version) {
+    $this->environmentProvider->for($tenant, function (TenantInterface $tenant, EntityManagerInterface $environmentEntityManager) use ($version) {
+      // The environment provider uses the configured manager to look up
+      // tenants. Tenant migrations must use Doctrine's tenant manager, whose
+      // connection the database adapter has just switched to this tenant.
+      $em = $this->doctrine->getManager('tenant');
+      if (!$em instanceof EntityManagerInterface) {
+        throw new RuntimeException('The tenant entity manager must implement EntityManagerInterface.');
+      }
+
       // Doctrine freezes a DependencyFactory when its first command initializes.
       // Each tenant needs a factory bound to the active tenant entity manager.
       $dependencyFactory = DependencyFactory::fromEntityManager(

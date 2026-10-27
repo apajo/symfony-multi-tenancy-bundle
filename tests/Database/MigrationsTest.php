@@ -94,7 +94,7 @@ class MigrationsTest extends AbstractDatabaseTestCase
     self::assertStringEndsWith('config/migrations/tenant.yml', $config['tenant']);
   }
 
-  public function testMigrationCommandUsesItsOwnFactoryWhenSharedFactoryIsFrozen(): void
+  public function testDefaultMigrationDoesNotRequestANamedManagerFromItsBoundFactory(): void
   {
     $generated = $this->generateMigrations();
     self::assertNotEmpty($generated['default'], 'the default manager needs a migration to apply');
@@ -119,6 +119,52 @@ class MigrationsTest extends AbstractDatabaseTestCase
       0,
       (int) $doctrine->getConnection('default')->fetchOne('SELECT COUNT(*) FROM doctrine_migration_versions'),
       'the default migration must run through its factory-bound entity manager'
+    );
+  }
+
+  public function testMigrationsWorkForDefaultAndTenantEntityManagersInOneCommand(): void
+  {
+    $generated = $this->generateMigrations();
+    self::assertNotEmpty($generated['default']);
+    self::assertNotEmpty($generated['tenant']);
+
+    $this->dropAllTablesIn(self::ALTERNATE_TENANT_SCHEMA);
+
+    // The wrapper always migrates the default manager first. No tenant is
+    // selected here, so this call isolates the default manager's factory.
+    $application = new Application(self::$kernel);
+    $application->setAutoExit(false);
+    $application->add($this->container->get(MigrateCommand::class));
+
+    $input = new ArrayInput([
+      'command' => 'tenants:migrations:migrate',
+      'tenant_id' => 'no-such-tenant',
+    ]);
+    $input->setInteractive(false);
+    self::assertSame(Command::SUCCESS, $application->run($input, new BufferedOutput()));
+
+    /** @var Registry $doctrine */
+    $doctrine = $this->container->get('doctrine');
+    self::assertGreaterThan(
+      0,
+      (int) $doctrine->getConnection('default')->fetchOne('SELECT COUNT(*) FROM doctrine_migration_versions'),
+      'the default entity manager should record its migration'
+    );
+
+    // Seed a tenant only after the default migration so the migration-created
+    // registry table does not collide with SchemaTool's table creation.
+    $this->seedTenant();
+
+    // A full wrapper run first sees the already migrated default manager, then
+    // switches the tenant connection and runs the tenant migration.
+    $input = new ArrayInput(['command' => 'tenants:migrations:migrate']);
+    $input->setInteractive(false);
+    self::assertSame(Command::SUCCESS, $application->run($input, new BufferedOutput()));
+
+    self::assertGreaterThan(
+      0,
+      $this->migrationVersionCountIn(self::ALTERNATE_TENANT_SCHEMA),
+      'the tenant entity manager should record its migration in the tenant schema'
     );
   }
 
@@ -304,14 +350,7 @@ class MigrationsTest extends AbstractDatabaseTestCase
    */
   private function dropAllTablesIn(string $schema): void
   {
-    $dsn = Dsn::fromString(self::tenantDsn($schema));
-
-    $pdo = new \PDO(
-      sprintf('mysql:host=%s;port=%d;dbname=%s', $dsn->getHost(), $dsn->getPort(3306), $schema),
-      $dsn->getUser(),
-      $dsn->getPassword(),
-      [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]
-    );
+    $pdo = $this->schemaConnection($schema);
 
     $pdo->exec('SET FOREIGN_KEY_CHECKS=0');
 
@@ -321,6 +360,25 @@ class MigrationsTest extends AbstractDatabaseTestCase
     }
 
     $pdo->exec('SET FOREIGN_KEY_CHECKS=1');
+  }
+
+  private function migrationVersionCountIn(string $schema): int
+  {
+    return (int) $this->schemaConnection($schema)->query(
+      'SELECT COUNT(*) FROM doctrine_migration_versions'
+    )->fetchColumn();
+  }
+
+  private function schemaConnection(string $schema): \PDO
+  {
+    $dsn = Dsn::fromString(self::tenantDsn($schema));
+
+    return new \PDO(
+      sprintf('mysql:host=%s;port=%d;dbname=%s', $dsn->getHost(), $dsn->getPort(3306), $schema),
+      $dsn->getUser(),
+      $dsn->getPassword(),
+      [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]
+    );
   }
 
   private function dropAllTables(string $manager): void
