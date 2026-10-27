@@ -8,6 +8,7 @@ use aPajo\MultiTenancyBundle\Service\TenantConfig;
 use aPajo\MultiTenancyBundle\Service\TenantManager;
 use Doctrine\Migrations\Configuration\EntityManager\ExistingEntityManager;
 use Doctrine\Migrations\Configuration\Migration\ConfigurationFileWithFallback;
+use Doctrine\Migrations\DependencyFactory;
 use Doctrine\Migrations\Tools\Console\Command\MigrateCommand as DoctrineMigrateCommand;
 use Doctrine\Persistence\ManagerRegistry;
 use RuntimeException;

@@ -10,6 +10,10 @@ use aPajo\MultiTenancyBundle\Service\TenantConfig;
 use aPajo\MultiTenancyBundle\Tests\Entity\Default\Tenant;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use PHPUnit\Framework\Attributes\CoversClass;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\Process;
@@ -88,6 +92,22 @@ class MigrationsTest extends AbstractDatabaseTestCase
     self::assertArrayHasKey('tenant', $config);
     self::assertStringEndsWith('config/migrations/default.yml', $config['default']);
     self::assertStringEndsWith('config/migrations/tenant.yml', $config['tenant']);
+  }
+
+  public function testMigrationCommandUsesItsOwnFactoryWhenSharedFactoryIsFrozen(): void
+  {
+    $this->generateMigrations();
+
+    $this->container->get('doctrine.migrations.dependency_factory')->freeze();
+
+    $application = new Application(self::$kernel);
+    $application->setAutoExit(false);
+    $application->add($this->container->get(MigrateCommand::class));
+
+    $input = new ArrayInput(['tenant_id' => 'no-such-tenant']);
+    $input->setInteractive(false);
+
+    self::assertSame(Command::SUCCESS, $application->run($input, new BufferedOutput()));
   }
 
   public function testDiffCommandGeneratesMigrationsForBothEntityManagers(): void
